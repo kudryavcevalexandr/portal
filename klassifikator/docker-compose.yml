@@ -1,0 +1,157 @@
+version: "3.9"
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+    image: postgres:16
+    container_name: pg
+    environment:
+      POSTGRES_DB: directus
+      POSTGRES_USER: directus
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks: [appnet]
+    restart: unless-stopped
+
+  directus:
+    image: directus/directus:latest
+    container_name: directus
+    depends_on: [postgres]
+    environment:
+      KEY: ${DIRECTUS_KEY}
+      SECRET: ${DIRECTUS_SECRET}
+      DB_CLIENT: pg
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: directus
+      DB_USER: directus
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: "*"
+    ports:
+      - "8055:8055"
+    volumes:
+      - directus_uploads:/directus/uploads
+    networks: [appnet]
+    restart: unless-stopped
+
+  opensearch:
+    image: opensearchproject/opensearch:2
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+      - DISABLE_SECURITY_PLUGIN=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - os_data:/usr/share/opensearch/data
+    networks: [appnet]
+    restart: unless-stopped
+
+  dashboards:
+    image: opensearchproject/opensearch-dashboards:2
+    container_name: dashboards
+    depends_on: [opensearch]
+    environment:
+      - OPENSEARCH_HOSTS=["http://opensearch:9200"]
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    ports:
+      - "5601:5601"
+    networks: [appnet]
+    restart: unless-stopped
+
+  os_api:
+    build: ./os_api
+    container_name: os_api
+    depends_on: [opensearch]
+    environment:
+      - OPENSEARCH_URL=http://opensearch:9200
+      - OPENSEARCH_INDEX=class_tree_v1
+      - SEARCH_FIELDS=l4_name^3,l3_name^2,l2_name^2,l1_name,path_name^2,l4_code,path_code
+      - PG_HOST=postgres
+      - PG_PORT=5432
+      - PG_DB=directus
+      - PG_USER=directus
+      - PG_PASS=${POSTGRES_PASSWORD}
+    ports:
+      - "8010:8010"
+    volumes:
+      - /home/admintep/klassifikator/py_scripts:/scripts:ro
+    networks: [appnet]
+    restart: unless-stopped
+
+  web:
+    image: nginx:alpine
+    container_name: web
+    depends_on: [os_api]
+    ports:
+      - "8080:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+      - ./web/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./web/static/search:/var/www/search:ro
+    networks: [appnet]
+    restart: unless-stopped
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    networks: [appnet]
+
+  superset:
+    image: apache/superset:3.1.0
+    container_name: superset
+    restart: unless-stopped
+    depends_on: [redis, postgres]
+    environment:
+      SUPERSET_ENV: production
+      SUPERSET_LOAD_EXAMPLES: "no"
+      SUPERSET_SECRET_KEY: "change_this_secret_key"
+      SQLALCHEMY_DATABASE_URI: postgresql+psycopg2://superset:bd65b0087023df681cfe37d17f76502a@postgres:5432/superset
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    ports:
+      - "8088:8088"
+    networks: [appnet]
+    
+  neo4j:
+    image: neo4j:5
+    container_name: neo4j
+    ports:
+      - "7474:7474"   # web UI
+      - "7687:7687"   # bolt
+    environment:
+      - NEO4J_AUTH=neo4j/neo4j12345
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks: [appnet]
+    restart: unless-stopped   
+
+volumes:
+  pg_data:
+  directus_uploads:
+  os_data:
+  neo4j_data:
+  neo4j_logs:
+
+networks:
+  appnet:
+

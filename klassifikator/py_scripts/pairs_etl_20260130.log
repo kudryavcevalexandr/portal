@@ -1,0 +1,10 @@
+2026-01-30 14:41:43 | INFO | pymorphy3: OK
+2026-01-30 14:41:43 | ERROR | DB_PASS пустой. Укажи переменную окружения DB_PASS.
+2026-01-30 14:48:29 | INFO | pymorphy3: OK
+2026-01-30 14:48:29 | ERROR | DB_PASS пустой. Укажи переменную окружения DB_PASS.
+2026-01-30 14:52:08 | INFO | pymorphy3: OK
+2026-01-30 14:52:09 | INFO | DB: directus@172.16.10.129:5432/directus
+2026-01-30 14:52:09 | INFO | SRC: public.v_nomenclature_spec_l3_dup_links_v1 + public.v_nomenclature_spec_read_v1 | DST: public.v_nomenclature_spec_pairs_v1
+2026-01-30 14:52:09 | INFO | Chunk 1: loaded 321 rows
+2026-01-30 14:52:09 | INFO | Chunk 1: upserted~321, empty_names=0
+2026-01-30 14:52:09 | INFO | DONE. rows=321, upserted~321, time=0.4s

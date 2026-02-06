@@ -1,0 +1,11 @@
+.wrap{max-width:1100px; margin:0 auto; padding:18px}
+.top{display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:14px}
+.brand{font-weight:800; letter-spacing:.2px}
+.grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px}
+.card,.panel{background:var(--panel); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow)}
+.card{padding:14px}
+.card .h{font-weight:800; margin-bottom:6px}
+.card .p{font-size:14px}
+.panel{padding:14px}
+.btn{display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:transparent}
+.foot{margin-top:14px; font-size:12px}

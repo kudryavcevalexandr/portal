@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Поиск номенклатуры</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#101722;
+      --panel2:#0f1620;
+      --text:#e6eefc;
+      --muted:#98a6bd;
+      --line:#1f2a3a;
+      --accent:#6ee7ff;
+      --accent2:#a78bfa;
+      --warn:#fbbf24;
+      --ok:#34d399;
+      --bad:#fb7185;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --r: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background: radial-gradient(1200px 800px at 20% 0%, rgba(110,231,255,.10), transparent 55%),
+                  radial-gradient(1000px 700px at 80% 10%, rgba(167,139,250,.10), transparent 50%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px}
+    .top{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,20,.65);
+      border-bottom:1px solid rgba(31,42,58,.65);
+    }
+    .bar{
+      display:flex; gap:12px; align-items:center;
+      padding:14px 18px;
+      max-width:1100px; margin:0 auto;
+    }
+    .brand{
+      display:flex; flex-direction:column; gap:2px; min-width:180px;
+    }
+    .brand .t{font-weight:700; letter-spacing:.2px}
+    .brand .s{font-size:12px; color:var(--muted)}
+    .search{
+      flex:1;
+      display:flex; align-items:center; gap:10px;
+      background: linear-gradient(180deg, rgba(16,23,34,.95), rgba(15,22,32,.85));
+      border:1px solid rgba(31,42,58,.9);
+      border-radius: 999px;
+      padding:10px 14px;
+      box-shadow: var(--shadow);
+    }
+    .search input{
+      flex:1;
+      border:0; outline:0; background:transparent;
+      color:var(--text);
+      font-size:16px;
+    }
+    .pill{
+      font-size:12px; color:var(--muted);
+      border:1px solid rgba(31,42,58,.9);
+      border-radius:999px;
+      padding:6px 10px;
+      background: rgba(16,23,34,.7);
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn{
+      border:1px solid rgba(31,42,58,.9);
+      background: rgba(16,23,34,.7);
+      color:var(--text);
+      border-radius: 12px;
+      padding:10px 12px;
+      cursor:pointer;
+      transition: transform .05s ease, border-color .15s ease;
+      user-select:none;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn:hover{border-color: rgba(110,231,255,.55)}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+      padding-top:16px;
+    }
+    .panel{
+      background: linear-gradient(180deg, rgba(16,23,34,.92), rgba(15,22,32,.82));
+      border:1px solid rgba(31,42,58,.9);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panel .hd{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:14px 14px 10px 14px;
+      border-bottom:1px solid rgba(31,42,58,.65);
+    }
+    .panel .hd .left{display:flex; flex-direction:column; gap:4px}
+    .panel .hd .title{font-weight:700}
+    .panel .hd .sub{font-size:12px;color:var(--muted)}
+    .panel .bd{padding:12px 14px}
+    .status{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      font-size:12px; color:var(--muted);
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background: var(--muted);
+      display:inline-block;
+    }
+    .dot.ok{background: var(--ok)}
+    .dot.bad{background: var(--bad)}
+    .dot.warn{background: var(--warn)}
+    .row{
+      display:flex; justify-content:space-between; gap:12px;
+      padding:12px 0;
+      border-bottom:1px dashed rgba(31,42,58,.7);
+    }
+    .row:last-child{border-bottom:0}
+    .main{
+      display:flex; flex-direction:column; gap:6px; min-width:0;
+    }
+    .name{
+      font-size:15px; line-height:1.25;
+      font-weight:650;
+      word-break:break-word;
+    }
+    .meta{
+      display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+      font-size:12px; color:var(--muted);
+    }
+    .tag{
+      font-family: var(--mono);
+      border:1px solid rgba(31,42,58,.9);
+      background: rgba(11,15,20,.35);
+      padding:4px 8px;
+      border-radius: 999px;
+      color: #cfe3ff;
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .crumbs{
+      font-size:12px;color:var(--muted);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .side{
+      text-align:right;
+      display:flex; flex-direction:column; gap:8px; align-items:flex-end;
+      flex:0 0 auto;
+    }
+    .score{
+      font-family: var(--mono);
+      font-size:12px;
+      color:#cfe3ff;
+      border:1px solid rgba(31,42,58,.9);
+      background: rgba(110,231,255,.08);
+      padding:6px 10px;
+      border-radius: 12px;
+    }
+    .skeleton{
+      background: linear-gradient(90deg, rgba(31,42,58,.4), rgba(31,42,58,.15), rgba(31,42,58,.4));
+      background-size: 200% 100%;
+      animation: sh 1.15s infinite;
+      border-radius: 12px;
+      height: 14px;
+    }
+    @keyframes sh{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+    .kbd{font-family:var(--mono); font-size:11px; padding:3px 6px; border-radius:8px; border:1px solid rgba(31,42,58,.9); background: rgba(11,15,20,.35); color:#cfe3ff;}
+    .pager{
+      display:flex; gap:10px; align-items:center; justify-content:flex-end;
+      padding:12px 14px;
+      border-top:1px solid rgba(31,42,58,.65);
+      background: rgba(11,15,20,.22);
+    }
+    .pager .muted{color:var(--muted); font-size:12px}
+    mark{
+      background: rgba(110,231,255,.18);
+      color: var(--text);
+      padding:0 3px;
+      border-radius:6px;
+    }
+
+    @media (max-width:720px){
+      .brand{display:none}
+      .bar{padding:12px}
+      .row{flex-direction:column; align-items:flex-start}
+      .side{align-items:flex-start; text-align:left}
+    }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="bar">
+      <div class="brand">
+        <div class="t">Поиск номенклатуры</div>
+        <div class="s">быстрый поиск + красиво оформленная выдача</div>
+      </div>
+
+      <div class="search" role="search">
+        <span class="pill">API</span>
+        <input id="q" type="search" placeholder="Например: ВВГнг(А)-LS 3×2.5 или “трансформатор 10 кВ”" autocomplete="off" />
+        <span class="pill"><span class="kbd">Enter</span> искать</span>
+      </div>
+
+      <button class="btn" id="cfgBtn" title="Показать настройки">⚙️</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="grid">
+      <div class="panel">
+        <div class="hd">
+          <div class="left">
+            <div class="title">Результаты</div>
+            <div class="sub" id="subline">Введите запрос и нажмите Enter</div>
+          </div>
+          <div class="status" id="status">
+            <span class="dot warn" id="apiDot"></span>
+            <span id="apiText">API: не проверено</span>
+            <span class="pill">подсказка: <span class="kbd">Ctrl</span>+<span class="kbd">K</span> фокус на поиск</span>
+          </div>
+        </div>
+
+        <div class="bd" id="list">
+          <!-- results render here -->
+        </div>
+
+        <div class="pager">
+          <span class="muted" id="rangeText"></span>
+          <button class="btn" id="prevBtn">←</button>
+          <button class="btn" id="nextBtn">→</button>
+        </div>
+      </div>
+
+      <div class="panel" id="cfgPanel" style="display:none;">
+        <div class="hd">
+          <div class="left">
+            <div class="title">Настройки</div>
+            <div class="sub">поменяйте адрес API и сопоставление полей при необходимости</div>
+          </div>
+          <button class="btn" id="closeCfg">Закрыть</button>
+        </div>
+        <div class="bd" style="display:grid; gap:10px;">
+          <div style="display:grid; gap:6px;">
+            <div style="font-size:12px;color:var(--muted);">API_BASE</div>
+            <input id="apiBaseInp" style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(31,42,58,.9);background:rgba(11,15,20,.35);color:var(--text);outline:none;"
+                   placeholder="http://localhost:8080" />
+            <div style="font-size:12px;color:var(--muted);">
+              Должен отвечать эндпоинт <span class="tag">/api/search</span> с параметрами <span class="tag">q</span>, <span class="tag">size</span>, <span class="tag">from</span>.
+            </div>
+          </div>
+
+          <div style="display:grid; gap:6px;">
+            <div style="font-size:12px;color:var(--muted);">Размер страницы (size)</div>
+            <input id="sizeInp" type="number" min="5" max="100"
+                   style="width:160px;padding:10px 12px;border-radius:12px;border:1px solid rgba(31,42,58,.9);background:rgba(11,15,20,.35);color:var(--text);outline:none;"
+                   />
+          </div>
+
+          <div style="font-size:12px;color:var(--muted);line-height:1.45;">
+            Если ваше API возвращает “плоский” формат — ок. Если возвращает “сырой” OpenSearch —
+            тоже ок: страница сама нормализует ответ.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ====== CONFIG ======
+  let API_BASE = localStorage.getItem("API_BASE") || "http://localhost:8080"; // поменяйте на http://localhost:8010 если нужно
+  let PAGE_SIZE = Number(localStorage.getItem("PAGE_SIZE") || 20);
+
+  // ====== STATE ======
+  let lastQuery = "";
+  let from = 0;
+  let total = 0;
+  let inflight = null;
+
+  const elQ = document.getElementById("q");
+  const elList = document.getElementById("list");
+  const elSub = document.getElementById("subline");
+  const elRange = document.getElementById("rangeText");
+  const apiDot = document.getElementById("apiDot");
+  const apiText = document.getElementById("apiText");
+
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+
+  // Config UI
+  const cfgBtn = document.getElementById("cfgBtn");
+  const cfgPanel = document.getElementById("cfgPanel");
+  const closeCfg = document.getElementById("closeCfg");
+  const apiBaseInp = document.getElementById("apiBaseInp");
+  const sizeInp = document.getElementById("sizeInp");
+
+  apiBaseInp.value = API_BASE;
+  sizeInp.value = PAGE_SIZE;
+
+  cfgBtn.onclick = () => { cfgPanel.style.display = "block"; };
+  closeCfg.onclick = () => { cfgPanel.style.display = "none"; };
+
+  apiBaseInp.addEventListener("change", () => {
+    API_BASE = apiBaseInp.value.trim() || API_BASE;
+    localStorage.setItem("API_BASE", API_BASE);
+    pingApi();
+  });
+  sizeInp.addEventListener("change", () => {
+    PAGE_SIZE = Math.max(5, Math.min(100, Number(sizeInp.value || 20)));
+    localStorage.setItem("PAGE_SIZE", String(PAGE_SIZE));
+  });
+
+  // Ctrl+K focus
+  window.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      elQ.focus();
+      elQ.select();
+    }
+  });
+
+  // Enter = search
+  elQ.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      from = 0;
+      doSearch(elQ.value.trim());
+    }
+  });
+
+  prevBtn.onclick = () => {
+    if (from <= 0) return;
+    from = Math.max(0, from - PAGE_SIZE);
+    doSearch(lastQuery);
+  };
+  nextBtn.onclick = () => {
+    if (from + PAGE_SIZE >= total) return;
+    from = from + PAGE_SIZE;
+    doSearch(lastQuery);
+  };
+
+  function setApiStatus(kind, text){
+    apiDot.className = "dot " + (kind || "");
+    apiText.textContent = text;
+  }
+
+  async function pingApi(){
+    // мягкая проверка доступности
+    try{
+      setApiStatus("warn", "API: проверяем…");
+      const r = await fetch(API_BASE.replace(/\/$/,"") + "/api/health", { method:"GET" });
+      if (r.ok) setApiStatus("ok", "API: доступно");
+      else setApiStatus("warn", "API: отвечает, но /api/health не ok");
+    }catch(err){
+      setApiStatus("bad", "API: недоступно (проверьте API_BASE)");
+    }
+  }
+
+  function renderSkeleton(){
+    elList.innerHTML = "";
+    for(let i=0;i<6;i++){
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <div class="main">
+          <div class="skeleton" style="width:${60 + Math.random()*30}%;"></div>
+          <div class="skeleton" style="width:${40 + Math.random()*40}%; height:12px; opacity:.75;"></div>
+        </div>
+        <div class="side">
+          <div class="skeleton" style="width:90px; height:26px;"></div>
+        </div>`;
+      elList.appendChild(row);
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[c]));
+  }
+
+  function highlight(text, q){
+    if(!q) return escapeHtml(text);
+    const safe = escapeHtml(text);
+    const parts = q.split(/\s+/).filter(Boolean).slice(0,6);
+    if(!parts.length) return safe;
+    // простая подсветка без регэксп-инъекций
+    let out = safe;
+    for(const p of parts){
+      const pp = escapeHtml(p);
+      if(pp.length < 2) continue;
+      out = out.replaceAll(pp, `<mark>${pp}</mark>`);
+    }
+    return out;
+  }
+
+  function normalizeResponse(raw){
+    // поддерживаем:
+    //  A) { total: 123, hits: [{id, code, name, unit, path, level, score}] }
+    //  B) OpenSearch: { hits: { total: {value}, hits: [{ _id, _score, _source: {...}}] } }
+    if(raw && Array.isArray(raw.hits) && typeof raw.total !== "undefined"){
+      return {
+        total: Number(raw.total) || 0,
+        items: raw.hits.map(h => ({
+          id: h.id ?? h._id ?? "",
+          code: h.code ?? h.nomenclature_code ?? h.code_x ?? "",
+          name: h.name ?? h.nomenclature_name ?? h.name_x ?? "",
+          unit: h.unit ?? h.ed_izm ?? "",
+          path: h.path ?? h.breadcrumbs ?? "",
+          level: h.level ?? "",
+          parent_id: h.parent_id ?? "",
+          score: h.score ?? "",
+          raw: h
+        }))
+      };
+    }
+
+    const osHits = raw?.hits?.hits || [];
+    const osTotal = raw?.hits?.total?.value ?? raw?.hits?.total ?? 0;
+
+    return {
+      total: Number(osTotal) || 0,
+      items: osHits.map(h => {
+        const s = h?._source || {};
+        return {
+          id: h?._id ?? s.id ?? "",
+          code: s.code ?? s.nomenclature_code ?? s.code_x ?? "",
+          name: s.name ?? s.nomenclature_name ?? s.name_x ?? "",
+          unit: s.unit ?? s.ed_izm ?? "",
+          path: s.path ?? s.breadcrumbs ?? "",
+          level: s.level ?? "",
+          parent_id: s.parent_id ?? "",
+          score: h?._score ?? "",
+          raw: s
+        };
+      })
+    };
+  }
+
+  function renderList(items, q){
+    elList.innerHTML = "";
+    if(!items.length){
+      elList.innerHTML = `<div style="color:var(--muted);padding:6px 0;">Ничего не найдено. Попробуйте другой запрос.</div>`;
+      return;
+    }
+
+    for(const it of items){
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const nameHtml = highlight(it.name || "(без названия)", q);
+      const code = escapeHtml(it.code || "");
+      const unit = escapeHtml(it.unit || "");
+      const path = escapeHtml(it.path || "");
+      const level = escapeHtml(it.level || "");
+      const id = escapeHtml(it.id || "");
+      const score = (it.score === "" || it.score === null || typeof it.score === "undefined")
+        ? ""
+        : String(it.score).slice(0, 8);
+
+      row.innerHTML = `
+        <div class="main">
+          <div class="name">${nameHtml}</div>
+          <div class="meta">
+            ${code ? `<span class="tag">${code}</span>` : ``}
+            ${unit ? `<span class="tag">${unit}</span>` : ``}
+            ${level ? `<span class="tag">L${level}</span>` : ``}
+            ${id ? `<span class="tag" title="id">${id}</span>` : ``}
+          </div>
+          ${path ? `<div class="crumbs" title="${path}">${path}</div>` : ``}
+        </div>
+        <div class="side">
+          ${score ? `<div class="score">score: ${escapeHtml(score)}</div>` : ``}
+          <button class="btn" title="Скопировать код" data-copy="${code}">Копировать</button>
+        </div>
+      `;
+
+      // copy handler
+      row.querySelector("[data-copy]")?.addEventListener("click", async (e) => {
+        const v = e.currentTarget.getAttribute("data-copy") || "";
+        try{
+          await navigator.clipboard.writeText(v);
+          e.currentTarget.textContent = "Скопировано";
+          setTimeout(()=> e.currentTarget.textContent = "Копировать", 900);
+        }catch(_){
+          alert("Не удалось скопировать (браузер запретил). Код: " + v);
+        }
+      });
+
+      elList.appendChild(row);
+    }
+  }
+
+  async function doSearch(q){
+    lastQuery = q;
+    if(!q){
+      elSub.textContent = "Введите запрос и нажмите Enter";
+      elRange.textContent = "";
+      elList.innerHTML = `<div style="color:var(--muted);padding:6px 0;">Пример: <span class="tag">кабель ввгнг</span>, <span class="tag">трансформатор 10</span>, <span class="tag">насос</span></div>`;
+      return;
+    }
+
+    // cancel previous
+    if(inflight) inflight.abort();
+    inflight = new AbortController();
+
+    renderSkeleton();
+    elSub.textContent = `Ищем “${q}”…`;
+    elRange.textContent = "";
+
+    const url = new URL(API_BASE.replace(/\/$/,"") + "/api/search");
+    url.searchParams.set("q", q);
+    url.searchParams.set("size", String(PAGE_SIZE));
+    url.searchParams.set("from", String(from));
+
+    try{
+      const t0 = performance.now();
+      const r = await fetch(url.toString(), { signal: inflight.signal });
+      if(!r.ok) throw new Error("HTTP " + r.status);
+
+      const raw = await r.json();
+      const norm = normalizeResponse(raw);
+
+      total = norm.total || 0;
+
+      const t1 = performance.now();
+      const ms = Math.round(t1 - t0);
+
+      const start = total ? (from + 1) : 0;
+      const end = Math.min(from + PAGE_SIZE, total);
+
+      elSub.textContent = `Найдено: ${total} • время: ${ms} мс`;
+      elRange.textContent = total ? `показано ${start}–${end} из ${total}` : ``;
+
+      prevBtn.disabled = (from <= 0);
+      nextBtn.disabled = (from + PAGE_SIZE >= total);
+
+      renderList(norm.items, q);
+
+      setApiStatus("ok", "API: доступно");
+    }catch(err){
+      if(err.name === "AbortError") return;
+      setApiStatus("bad", "API: ошибка запроса");
+      elSub.textContent = "Ошибка поиска: проверьте API_BASE и эндпоинт /api/search";
+      elList.innerHTML = `
+        <div style="color:var(--bad);padding:6px 0;">
+          <div style="font-weight:700;">Не удалось получить результаты</div>
+          <div style="color:var(--muted);margin-top:6px;">
+            URL: <span class="tag">${escapeHtml(url.toString())}</span><br/>
+            Ошибка: <span class="tag">${escapeHtml(err.message || String(err))}</span>
+          </div>
+        </div>`;
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+    }
+  }
+
+  // initial
+  pingApi();
+  doSearch("");
+
+</script>
+</body>
+</html>
+

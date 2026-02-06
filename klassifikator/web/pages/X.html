@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Номенклатура — nomenclature_spec_all_v1</title>
+
+  <link rel="stylesheet" href="../assets/css/base.css" />
+  <link rel="stylesheet" href="../assets/css/layout.css" />
+  <link rel="stylesheet" href="../assets/css/table.css" />
+
+  <style>
+    /* чуть-чуть локальных стилей именно под эту страницу */
+    .page-head{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid var(--line);
+      position: sticky; top:0; z-index: 10;
+      background: linear-gradient(180deg, rgba(16,23,34,.98), rgba(16,23,34,.92));
+      backdrop-filter: blur(6px);
+    }
+    .page-title{ margin:0; font-size: 18px; letter-spacing:.2px; }
+    .page-sub{ margin:4px 0 0; color: var(--muted); font-size: 12px; }
+    .toolbar{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; align-items:center;
+    }
+    .field{
+      display:flex; flex-direction:column; gap:6px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      min-width: 220px;
+    }
+    .field label{ font-size: 11px; color: var(--muted); }
+    .field input, .field select{
+      width: 100%;
+      background: #0b111a;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 10px;
+      outline: none;
+    }
+    .field input:focus, .field select:focus{
+      border-color: rgba(52,211,153,.6);
+      box-shadow: 0 0 0 3px rgba(52,211,153,.12);
+    }
+    .btn{
+      background: #0b111a;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor:pointer;
+    }
+    .btn:hover{ border-color: rgba(148,163,184,.55); }
+    .btn.primary{
+      border-color: rgba(52,211,153,.55);
+      box-shadow: 0 0 0 3px rgba(52,211,153,.08);
+    }
+    .statusbar{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding: 10px 18px 14px;
+      color: var(--muted);
+    }
+    .pager{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+    .mono{ font-family: var(--mono); }
+    .table-wrap{
+      padding: 0 18px 18px;
+    }
+    .hint{
+      color: var(--muted);
+      font-size: 12px;
+      padding: 0 18px 18px;
+    }
+    .clickable{ cursor:pointer; user-select:none; }
+    .sort-ind{ color: var(--muted); font-size: 11px; margin-left: 6px; }
+    .badge{
+      display:inline-flex; align-items:center; gap:6px;
+      padding: 3px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--panel2);
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Витрина: <span class="mono">nomenclature_spec_all_v1</span></h1>
+      <div class="page-sub">Поля: item_name, type_mark, uom, class_l3_id · фильтры · сортировка · пагинация</div>
+    </div>
+
+    <div class="toolbar">
+      <div class="field">
+        <label>Быстрый поиск (по всем 4 полям)</label>
+        <input id="q" type="text" placeholder="например: кабель / УХЛ / кг / 123" />
+      </div>
+
+      <div class="field">
+        <label>Фильтр: item_name</label>
+        <input id="f_item_name" type="text" placeholder="содержит..." />
+      </div>
+
+      <div class="field">
+        <label>Фильтр: type_mark</label>
+        <input id="f_type_mark" type="text" placeholder="содержит..." />
+      </div>
+
+      <div class="field">
+        <label>Фильтр: uom</label>
+        <input id="f_uom" type="text" placeholder="например: шт / м / кг" />
+      </div>
+
+      <div class="field">
+        <label>Фильтр: class_l3_id</label>
+        <input id="f_class_l3_id" type="text" placeholder="например: 245" />
+      </div>
+
+      <div class="field" style="min-width:140px">
+        <label>Строк на странице</label>
+        <select id="page_size">
+          <option value="50">50</option>
+          <option value="100" selected>100</option>
+          <option value="200">200</option>
+          <option value="500">500</option>
+        </select>
+      </div>
+
+      <button id="reset" class="btn">Сброс</button>
+      <button id="refresh" class="btn primary">Обновить</button>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <div id="statusLeft" class="badge">Загрузка…</div>
+    <div class="pager">
+      <button id="prev" class="btn">←</button>
+      <span class="mono" id="pageInfo">—</span>
+      <button id="next" class="btn">→</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="clickable" data-sort="item_name">item_name <span class="sort-ind" id="si_item_name"></span></th>
+          <th class="clickable" data-sort="type_mark">type_mark <span class="sort-ind" id="si_type_mark"></span></th>
+          <th class="clickable" data-sort="uom">uom <span class="sort-ind" id="si_uom"></span></th>
+          <th class="clickable" data-sort="class_l3_id">class_l3_id <span class="sort-ind" id="si_class_l3_id"></span></th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="4" style="color:var(--muted); padding:14px 10px;">Загрузка…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="hint">
+    Подсказка: клик по заголовку — сортировка (повторный клик меняет направление).
+  </div>
+
+  <!-- важно: module -->
+  <script type="module" src="../assets/js/page-X.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Портал</title>
+
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+
+  <style>
+    .wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .top{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom: 14px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    /* Навигация: каждый пункт отдельной строкой, на всю ширину */
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin: 14px 0 18px 0;
+    }
+    .nav .nav-card{
+      display:block;
+      width:100%;
+      padding:16px;
+      border:1px solid var(--line);
+      background:var(--panel);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      text-decoration:none;
+      color:var(--text);
+      transition: transform .08s ease, filter .08s ease;
+    }
+    .nav .nav-card:hover{
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+    .nav .h{ font-size:18px; font-weight:700; margin:0 0 6px 0; }
+    .nav .p{ margin:0; color:var(--muted); }
+
+    /* Панель отчёта */
+    .panel{
+      margin-top: 14px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    /* Обёртка таблицы */
+    .table-wrap{
+      margin-top: 10px;
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:14px;
+    }
+
+    /* ЖЁСТКИЕ стили границ — чтобы ничего не перетёрлось базовыми CSS */
+    table.r1_table{
+      width:100% !important;
+      border-collapse:collapse !important;
+      border:1px solid var(--line) !important;
+    }
+    table.r1_table th,
+    table.r1_table td{
+      border:1px solid var(--line) !important;
+      padding:10px 12px !important;
+    }
+    table.r1_table thead th{
+      background: var(--panel2) !important;
+      text-align:left !important;
+      font-weight:700 !important;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    table.r1_table td.num,
+    table.r1_table th.num{
+      text-align:right !important;
+      width:240px;
+      white-space:nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    table.r1_table tbody tr:hover td{
+      background: rgba(255,255,255,.03) !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand">Портал</div>
+     
+    </header>
+
+    <nav class="nav">
+      <a class="nav-card" href="/pages/hierarchy.html">
+        <div class="h">Классификатор ТЭК</div>
+      
+      </a>
+
+      <a class="nav-card" href="/pages/search.html">
+        <div class="h">Поиск</div>
+       
+      </a>
+
+      <a class="nav-card" href="/pages/about.html">
+        <div class="h">О проекте</div>
+      
+      </a>
+    </nav>
+
+    <section class="panel">
+      <h4 style="margin:0 0 6px 0;">Количество позиций номенклатуры по объектам</h4>
+      <div id="r1_status" style="color:var(--muted); margin-bottom:10px;">Загрузка…</div>
+
+      <div class="table-wrap">
+        <table class="r1_table" id="r1_table">
+          <thead>
+            <tr>
+              <th>Наименование объекта</th>
+              <th class="num">Количество позиций по ВОМ</th>
+            </tr>
+          </thead>
+          <tbody id="r1_tbody">
+            <tr>
+              <td colspan="2" style="color:var(--muted); padding:12px 10px;">Загрузка…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script src="/assets/js/config.js"></script>
+  <script type="module" src="/assets/js/page-index.js"></script>
+</body>
+</html>

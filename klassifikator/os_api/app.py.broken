@@ -1,0 +1,44 @@
+import os
+import requests
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+
+OPENSEARCH_URL = os.getenv("OPENSEARCH_URL", "http://opensearch:9200").rstrip("/")
+
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+@app.get("/health")
+def health():
+    try:
+        r = requests.get(f"{OPENSEARCH_URL}", timeout=2)
+        return jsonify({"ok": True, "opensearch_status": r.status_code})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+@app.get("/search")
+def search():
+    q = (request.args.get("q") or "").strip()
+    size = int(request.args.get("size") or 10)
+    index = request.args.get("index") or "class_tree_v1"
+    if not q:
+        return jsonify({"error": "q is required"}), 400
+
+    body = {
+        "size": size,
+        "query": {
+            "multi_match": {
+                "query": q,
+                "fields": [
+                    "l1_name", "l2_name", "l3_name", "l4_name", "path_name",
+                    "l1_code", "l2_code", "l3_code", "l4_code", "path_code"
+                ]
+            }
+        }
+    }
+
+    r = requests.get(f"{OPENSEARCH_URL}/{index}/_search", json=body, timeout=10)
+    return jsonify(r.json()), r.status_code 
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8010)

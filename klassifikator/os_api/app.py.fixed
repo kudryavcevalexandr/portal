@@ -1,0 +1,76 @@
+import os
+import requests
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+
+OPENSEARCH_URL = os.getenv("OPENSEARCH_URL", "http://opensearch:9200").rstrip("/")
+
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+@app.get("/health")
+def health():
+    try:
+        r = requests.get(f"{OPENSEARCH_URL}", timeout=2)
+        return jsonify({"ok": True, "opensearch_status": r.status_code})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+@app.get("/search")
+def search():
+    q = (request.args.get("q") or "").strip()
+    size = int(request.args.get("size") or 10)
+    from_ = int(request.args.get("from") or 0)
+    index = request.args.get("index") or "class_tree_v1"
+
+    if not q:
+        return jsonify({"error": "q is required"}), 400
+
+    # Поля под ваш индекс class_tree_v1 (иерархия)
+    tree_fields = [
+        "l1_name", "l2_name", "l3_name", "l4_name", "path_name",
+        "l1_code", "l2_code", "l3_code", "l4_code", "path_code"
+    ]
+
+    # Если когда-то будете искать по старому индексу с name_x — оставим совместимость
+    legacy_fields = ["name_x^6", "name_x^3"]
+
+    fields = tree_fields if index == "class_tree_v1" else legacy_fields
+
+    body = {
+        "size": size,
+        "from": from_,
+        "query": {
+            "multi_match": {
+                "query": q,
+                "fields": fields
+            }
+        }
+    }
+
+    r = requests.get(f"{OPENSEARCH_URL}/{index}/_search", json=body, timeout=10)
+
+    # Нормализуем ответ под фронт: { total, hits: [...] }
+    data = r.json()
+    raw_hits = (data.get("hits", {}) or {}).get("hits", []) or []
+
+    hits = []
+    for h in raw_hits:
+        src = (h.get("_source", {}) or {})
+        hits.append({
+            "id": h.get("_id"),
+            "code": src.get("l4_code") or src.get("code") or src.get("nomenclature_code") or "",
+            "name": src.get("l4_name") or src.get("name") or src.get("nomenclature_name") or src.get("name_x") or "",
+            "unit": src.get("unit") or src.get("ed_izm") or "",
+            "path": src.get("path_name") or src.get("breadcrumbs") or "",
+            "level": 4 if index == "class_tree_v1" else "",
+            "score": h.get("_score")
+        })
+
+    total = (data.get("hits", {}) or {}).get("total", 0)
+    total_value = total.get("value") if isinstance(total, dict) else total
+
+    return jsonify({"total": int(total_value or 0), "hits": hits}), r.status_code
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8010)

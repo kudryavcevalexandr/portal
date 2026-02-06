@@ -1,0 +1,130 @@
+.tbl{width:100%; border-collapse:separate; border-spacing:0}
+.tbl th,.tbl td{padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:top; font-size:14px}
+.tbl th{position:sticky; top:0; background:var(--panel); z-index:1; text-align:left}
+.tbl tr:hover td{background:rgba(255,255,255,0.03)}
+
+/* границы таблицы */
+.table{
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden; /* чтобы радиус работал */
+}
+
+/* ячейки с линиями */
+.table th, .table td{
+  border-bottom: 1px solid var(--line);
+  padding: 8px 10px;
+}
+
+/* вертикальные линии */
+.table th + th, .table td + td{
+  border-left: 1px solid var(--line);
+}
+
+/* шапка таблицы */
+.table thead th{
+  position: sticky;
+  top: 86px; /* важно: под закреплённым header.panel */
+  z-index: 5;
+  background: linear-gradient(to bottom, rgba(20,24,33,0.98), rgba(20,24,33,0.92));
+}
+
+/* закрепляем верхний header (toolbar+описание) */
+.wrap > header.panel{
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(16,20,28,0.92);
+  backdrop-filter: blur(8px);
+}
+
+/* подсветка строк */
+.table tbody tr:hover{
+  background: rgba(255,255,255,0.04);
+}
+
+/* “зебра” для читаемости */
+.table tbody tr:nth-child(2n){
+  background: rgba(255,255,255,0.02);
+}
+
+/* уровни: L1-L3 визуально сильнее */
+.table tbody tr[data-level="1"] td:nth-child(2),
+.table tbody tr[data-level="2"] td:nth-child(2),
+.table tbody tr[data-level="3"] td:nth-child(2){
+  font-weight: 600;
+}
+
+/* L4 чуть “легче” */
+.table tbody tr[data-level="4"] td:nth-child(2){
+  font-weight: 400;
+}
+
+/* L4 не согласовано — мягко подсветить (если хочешь) */
+.table tbody tr[data-level="4"][data-approved="0"]{
+  background: rgba(255, 189, 46, 0.06);
+}
+
+/* ===== hierarchy-nomen: stable column widths ===== */
+
+#treeTable{
+  table-layout: fixed;   /* ключ: фиксируем раскладку колонок */
+  width: 100%;
+}
+
+#treeTable th, #treeTable td{
+  overflow: hidden;
+}
+
+/* колонки по индексам (1..7) */
+#treeTable th:nth-child(1), #treeTable td:nth-child(1){ width: 90px; }   /* Код */
+#treeTable th:nth-child(3), #treeTable td:nth-child(3){ width: 54px; }   /* Ур. */
+#treeTable th:nth-child(4), #treeTable td:nth-child(4){ width: 120px; }  /* На соглас. */
+#treeTable th:nth-child(5), #treeTable td:nth-child(5){ width: 70px; }   /* Ед. */
+#treeTable th:nth-child(6), #treeTable td:nth-child(6){ width: 70px; }   /* Согл. */
+#treeTable th:nth-child(7), #treeTable td:nth-child(7){ width: 320px; }  /* Примечания */
+
+/* Наименование: занимает остаток, но не раздувает таблицу */
+#treeTable th:nth-child(2), #treeTable td:nth-child(2){
+  width: auto;
+}
+
+/* Текст в Наименовании обрезаем красиво */
+#treeTable td:nth-child(2){
+  white-space: normal;        /* разрешаем перенос */
+  overflow-wrap: anywhere;    /* перенос даже длинных слов/кодов */
+  word-break: break-word;     /* запасной вариант */
+  line-height: 1.25;
+}
+
+/* input в Примечаниях не должен растягивать колонку */
+#treeTable td:nth-child(7) .note-input{
+  width: 100%;
+  min-width: 0; /* важно: иначе input может “ломать” fixed layout */
+}
+
+html, body { width:100% !important; margin:0 !important; }
+.wrap { outline: 3px solid red !important; max-width:none !important; width:100% !important; }
+.panel { outline: 2px solid lime !important; width:100% !important; }
+
+/* 1) уменьшаем высоту шапки */
+#treeTable thead th{
+  padding: 6px 8px;      /* было больше — делаем компактнее */
+  line-height: 1.1;
+  font-weight: 600;
+}
+
+/* 2) делаем sticky шапку таблицы */
+#treeTable thead th{
+  position: sticky;
+  top: var(--sticky-top, 0px);  /* значение зададим ниже */
+  z-index: 20;
+  background: var(--panel);     /* важно: иначе будет "прозрачной" */
+}
+
+/* 3) чтобы линии не пропадали при sticky */
+#treeTable thead th{
+  box-shadow: 0 1px 0 var(--line);
+}

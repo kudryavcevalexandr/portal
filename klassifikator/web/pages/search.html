@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Поиск</title>
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="btn" href="/">← Главная</a>
+      <div class="brand">Поиск</div>
+      <div class="muted">/api → os_api → OpenSearch</div>
+    </header>
+
+    <div class="panel" style="margin-bottom:12px">
+      <div class="muted" id="health">...</div>
+    </div>
+
+    <div class="panel" style="margin-bottom:12px">
+      <form id="form" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+        <input id="q" placeholder="введите запрос (например: тест)" style="flex:1; min-width:220px; padding:12px 12px; border-radius:12px; border:1px solid var(--line); background:transparent; color:var(--text)">
+        <button class="btn" type="submit">Искать</button>
+        <button class="btn" type="button" data-q="тест">тест</button>
+        <button class="btn" type="button" data-q="насос">насос</button>
+      </form>
+    </div>
+
+    <pre class="panel" id="out" style="white-space:pre-wrap; margin:0">Введите запрос и нажмите «Искать»</pre>
+
+    <div class="foot muted">Если “Пусто” — значит индекс пустой/не тот. Тогда идём смотреть индексы в OpenSearch.</div>
+  </div>
+
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/page-search.js"></script>
+</body>
+</html>
