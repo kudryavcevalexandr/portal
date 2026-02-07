@@ -6,26 +6,56 @@
   <title>Поиск номенклатуры</title>
   <style>
     :root{
-      --bg:#0b0f14; --panel:#101722; --panel2:#0f1620;
-      --text:#e6eefc; --muted:#98a6bd; --line:#1f2a3a;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --r: 16px; --ok:#34d399; --bad:#fb7185; --warn:#fbbf24;
+      --bg:#ffffff; --panel:#f8fafc; --panel2:#eef2f7;
+      --text:#0f172a; --muted:#64748b; --line:#e2e8f0;
+      --shadow: 0 10px 30px rgba(15,23,42,.08);
+      --r: 16px; --ok:#059669; --bad:#e11d48; --warn:#d97706;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --glow-1: rgba(14,165,233,.16);
+      --glow-2: rgba(124,58,237,.16);
+      --top-bg: rgba(255,255,255,.85);
+      --top-border: rgba(226,232,240,.9);
+      --panel-border: rgba(226,232,240,.9);
+      --chip-bg: rgba(248,250,252,.9);
+      --chip-border: rgba(226,232,240,.9);
+      --tag-bg: rgba(241,245,249,.9);
+      --tag-text: #1d4ed8;
+      --score-bg: rgba(14,165,233,.12);
+      --mark-bg: rgba(14,165,233,.22);
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0b0f14; --panel:#101722; --panel2:#0f1620;
+        --text:#e6eefc; --muted:#98a6bd; --line:#1f2a3a;
+        --shadow: 0 10px 30px rgba(0,0,0,.35);
+        --r: 16px; --ok:#34d399; --bad:#fb7185; --warn:#fbbf24;
+        --glow-1: rgba(110,231,255,.10);
+        --glow-2: rgba(167,139,250,.10);
+        --top-bg: rgba(11,15,20,.65);
+        --top-border: rgba(31,42,58,.65);
+        --panel-border: rgba(31,42,58,.9);
+        --chip-bg: rgba(16,23,34,.7);
+        --chip-border: rgba(31,42,58,.9);
+        --tag-bg: rgba(11,15,20,.35);
+        --tag-text: #cfe3ff;
+        --score-bg: rgba(110,231,255,.08);
+        --mark-bg: rgba(110,231,255,.18);
+      }
     }
     *{box-sizing:border-box}
     body{
       margin:0; font-family: var(--sans); color:var(--text);
-      background: radial-gradient(1200px 800px at 20% 0%, rgba(110,231,255,.10), transparent 55%),
-                  radial-gradient(1000px 700px at 80% 10%, rgba(167,139,250,.10), transparent 50%),
+      background: radial-gradient(1200px 800px at 20% 0%, var(--glow-1), transparent 55%),
+                  radial-gradient(1000px 700px at 80% 10%, var(--glow-2), transparent 50%),
                   var(--bg);
     }
     .wrap{max-width:1100px;margin:0 auto;padding:18px}
     .top{
       position:sticky; top:0; z-index:10;
       backdrop-filter: blur(10px);
-      background: rgba(11,15,20,.65);
-      border-bottom:1px solid rgba(31,42,58,.65);
+      background: var(--top-bg);
+      border-bottom:1px solid var(--top-border);
     }
     .bar{
       display:flex; gap:12px; align-items:center;
@@ -36,8 +66,8 @@
     .brand .s{font-size:12px;color:var(--muted)}
     .search{
       flex:1; display:flex; align-items:center; gap:10px;
-      background: linear-gradient(180deg, rgba(16,23,34,.95), rgba(15,22,32,.85));
-      border:1px solid rgba(31,42,58,.9);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border:1px solid var(--panel-border);
       border-radius:999px;
       padding:10px 14px;
       box-shadow: var(--shadow);
@@ -48,15 +78,15 @@
     }
     .pill{
       font-size:12px; color:var(--muted);
-      border:1px solid rgba(31,42,58,.9);
+      border:1px solid var(--chip-border);
       border-radius:999px;
       padding:6px 10px;
-      background: rgba(16,23,34,.7);
+      background: var(--chip-bg);
       user-select:none; white-space:nowrap;
     }
     .btn{
-      border:1px solid rgba(31,42,58,.9);
-      background: rgba(16,23,34,.7);
+      border:1px solid var(--chip-border);
+      background: var(--chip-bg);
       color:var(--text);
       border-radius: 12px;
       padding:10px 12px;
@@ -65,10 +95,10 @@
       user-select:none;
     }
     .btn:active{transform: translateY(1px)}
-    .btn:hover{border-color: rgba(110,231,255,.55)}
+    .btn:hover{border-color: color-mix(in srgb, var(--tag-text) 55%, transparent)}
     .panel{
-      background: linear-gradient(180deg, rgba(16,23,34,.92), rgba(15,22,32,.82));
-      border:1px solid rgba(31,42,58,.9);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border:1px solid var(--panel-border);
       border-radius: var(--r);
       box-shadow: var(--shadow);
       overflow:hidden;
@@ -76,7 +106,7 @@
     .hd{
       display:flex; justify-content:space-between; align-items:center;
       padding:14px 14px 10px 14px;
-      border-bottom:1px solid rgba(31,42,58,.65);
+      border-bottom:1px solid var(--top-border);
     }
     .hd .left{display:flex;flex-direction:column;gap:4px}
     .title{font-weight:700}
@@ -88,7 +118,7 @@
     .row{
       display:flex; justify-content:space-between; gap:12px;
       padding:12px 0;
-      border-bottom:1px dashed rgba(31,42,58,.7);
+      border-bottom:1px dashed var(--top-border);
     }
     .row:last-child{border-bottom:0}
     .main{display:flex;flex-direction:column;gap:6px;min-width:0}
@@ -96,11 +126,11 @@
     .meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
     .tag{
       font-family: var(--mono);
-      border:1px solid rgba(31,42,58,.9);
-      background: rgba(11,15,20,.35);
+      border:1px solid var(--chip-border);
+      background: var(--tag-bg);
       padding:4px 8px;
       border-radius: 999px;
-      color:#cfe3ff;
+      color:var(--tag-text);
       max-width:100%;
       overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     }
@@ -109,20 +139,20 @@
     .score{
       font-family: var(--mono);
       font-size:12px;
-      color:#cfe3ff;
-      border:1px solid rgba(31,42,58,.9);
-      background: rgba(110,231,255,.08);
+      color:var(--tag-text);
+      border:1px solid var(--chip-border);
+      background: var(--score-bg);
       padding:6px 10px;
       border-radius: 12px;
     }
     .pager{
       display:flex; gap:10px; align-items:center; justify-content:flex-end;
       padding:12px 14px;
-      border-top:1px solid rgba(31,42,58,.65);
-      background: rgba(11,15,20,.22);
+      border-top:1px solid var(--top-border);
+      background: color-mix(in srgb, var(--panel2) 70%, transparent);
     }
     .pager .muted{color:var(--muted);font-size:12px}
-    mark{background: rgba(110,231,255,.18); color: var(--text); padding:0 3px; border-radius:6px;}
+    mark{background: var(--mark-bg); color: var(--text); padding:0 3px; border-radius:6px;}
     @media (max-width:720px){
       .brand{display:none}
       .bar{padding:12px}
