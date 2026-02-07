@@ -60,6 +60,56 @@
         --mark-bg: rgba(110,231,255,.18);
       }
     }
+    :root[data-theme="dark"]{
+      --bg:#0b0f14;
+      --panel:#101722;
+      --panel2:#0f1620;
+      --text:#e6eefc;
+      --muted:#98a6bd;
+      --line:#1f2a3a;
+      --accent:#6ee7ff;
+      --accent2:#a78bfa;
+      --warn:#fbbf24;
+      --ok:#34d399;
+      --bad:#fb7185;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --glow-1: rgba(110,231,255,.10);
+      --glow-2: rgba(167,139,250,.10);
+      --top-bg: rgba(11,15,20,.65);
+      --top-border: rgba(31,42,58,.65);
+      --panel-border: rgba(31,42,58,.9);
+      --chip-bg: rgba(16,23,34,.7);
+      --chip-border: rgba(31,42,58,.9);
+      --tag-bg: rgba(11,15,20,.35);
+      --tag-text: #cfe3ff;
+      --score-bg: rgba(110,231,255,.08);
+      --mark-bg: rgba(110,231,255,.18);
+    }
+    :root[data-theme="light"]{
+      --bg:#ffffff;
+      --panel:#f8fafc;
+      --panel2:#eef2f7;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --accent:#0284c7;
+      --accent2:#7c3aed;
+      --warn:#d97706;
+      --ok:#059669;
+      --bad:#e11d48;
+      --shadow: 0 10px 30px rgba(15,23,42,.08);
+      --glow-1: rgba(14,165,233,.16);
+      --glow-2: rgba(124,58,237,.16);
+      --top-bg: rgba(255,255,255,.85);
+      --top-border: rgba(226,232,240,.9);
+      --panel-border: rgba(226,232,240,.9);
+      --chip-bg: rgba(248,250,252,.9);
+      --chip-border: rgba(226,232,240,.9);
+      --tag-bg: rgba(241,245,249,.9);
+      --tag-text: #1d4ed8;
+      --score-bg: rgba(14,165,233,.12);
+      --mark-bg: rgba(14,165,233,.22);
+    }
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -272,6 +322,7 @@
         <span class="pill"><span class="kbd">Enter</span> искать</span>
       </div>
 
+      <button class="btn" id="themeToggle" type="button" title="Тёмная тема" aria-pressed="false">🌙</button>
       <button class="btn" id="cfgBtn" title="Показать настройки">⚙️</button>
     </div>
   </div>
@@ -350,6 +401,8 @@
   const elRange = document.getElementById("rangeText");
   const apiDot = document.getElementById("apiDot");
   const apiText = document.getElementById("apiText");
+  const themeToggle = document.getElementById("themeToggle");
+  const themeRoot = document.documentElement;
 
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
@@ -360,9 +413,45 @@
   const closeCfg = document.getElementById("closeCfg");
   const apiBaseInp = document.getElementById("apiBaseInp");
   const sizeInp = document.getElementById("sizeInp");
+  const THEME_KEY = "theme";
 
   apiBaseInp.value = API_BASE;
   sizeInp.value = PAGE_SIZE;
+
+  function getPreferredTheme(){
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+
+  function updateThemeToggle(){
+    const current = themeRoot.getAttribute("data-theme") || getPreferredTheme();
+    const isDark = current === "dark";
+    themeToggle.textContent = isDark ? "☀️" : "🌙";
+    themeToggle.setAttribute("aria-pressed", isDark ? "true" : "false");
+    themeToggle.title = isDark ? "Светлая тема" : "Тёмная тема";
+  }
+
+  function applyTheme(theme){
+    if(theme){
+      themeRoot.setAttribute("data-theme", theme);
+    }else{
+      themeRoot.removeAttribute("data-theme");
+    }
+    updateThemeToggle();
+  }
+
+  const savedTheme = localStorage.getItem(THEME_KEY);
+  if(savedTheme === "dark" || savedTheme === "light"){
+    applyTheme(savedTheme);
+  }else{
+    updateThemeToggle();
+  }
+
+  themeToggle.addEventListener("click", () => {
+    const current = themeRoot.getAttribute("data-theme") || getPreferredTheme();
+    const next = current === "dark" ? "light" : "dark";
+    applyTheme(next);
+    localStorage.setItem(THEME_KEY, next);
+  });
 
   cfgBtn.onclick = () => { cfgPanel.style.display = "block"; };
   closeCfg.onclick = () => { cfgPanel.style.display = "none"; };
