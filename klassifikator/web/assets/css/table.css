@@ -1,7 +1,12 @@
 .tbl{width:100%; border-collapse:separate; border-spacing:0}
 .tbl th,.tbl td{padding:12px 14px; border-bottom:1px solid var(--border-color); vertical-align:top; font-size:14px}
 .tbl th{position:sticky; top:0; background:var(--bg-card); z-index:1; text-align:left}
-.tbl tr:hover td{background:var(--table-hover)}
+.tbl tr:hover td{background-color: color-mix(in srgb, var(--bg-card) 85%, var(--border-color) 15%)}
+
+table{background-color: transparent}
+tr{background-color: transparent}
+td{background-color: transparent !important}
+th{background-color: var(--bg-card)}
 
 /* границы таблицы */
 .table{
@@ -42,7 +47,7 @@
 
 /* подсветка строк */
 .table tbody tr:hover{
-  background: var(--table-hover);
+  background-color: color-mix(in srgb, var(--bg-card) 85%, var(--border-color) 15%);
 }
 
 /* “зебра” для читаемости */
@@ -64,7 +69,7 @@
 
 /* L4 не согласовано — мягко подсветить (если хочешь) */
 .table tbody tr[data-level="4"][data-approved="0"]{
-  background: var(--table-hover);
+  background-color: color-mix(in srgb, var(--bg-card) 85%, var(--border-color) 15%);
 }
 
 /* ===== hierarchy-nomen: stable column widths ===== */
@@ -131,7 +136,8 @@ html, body { width:100% !important; margin:0 !important; }
 
 /* стили для "плюсиков" в дереве */
 [data-tree-toggle]{
-  font-weight: bold;
-  color: var(--tree-plus);
+  font-weight: 900 !important;
+  color: var(--tree-plus) !important;
+  font-size: 1.3em !important;
   cursor: pointer;
 }

@@ -28,7 +28,14 @@ const setTheme = (theme) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  applyTheme(getPreferredTheme());
+  console.log("Current theme class:", document.body.className);
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) {
+    document.body.classList.remove(DARK_CLASS);
+    setTheme("light");
+  } else {
+    applyTheme(getPreferredTheme());
+  }
   const toggle = document.querySelector("[data-theme-toggle]");
   if (!toggle) return;
   toggle.addEventListener("click", () => {
