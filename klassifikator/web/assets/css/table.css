@@ -5,7 +5,7 @@
 
 table{background-color: transparent}
 tr{background-color: transparent}
-td{background-color: transparent !important}
+td{background-color: transparent}
 th{background-color: var(--bg-card)}
 
 /* границы таблицы */

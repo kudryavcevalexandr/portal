@@ -3,6 +3,8 @@
 // Кнопки: Свернуть всё / Развернуть всё
 // Сортировка API: l1_num,l2_num,l3_num,l4_num,level
 
+import { directusReadItems } from "./api.js";
+
 function el(id) { return document.getElementById(id); }
 
 function ensureButtons() {
