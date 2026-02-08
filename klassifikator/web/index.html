@@ -9,17 +9,18 @@
   <link rel="stylesheet" href="/assets/css/layout.css">
 
   <style>
-    .wrap{
+    /* Общие контейнеры */
+    .wrap {
       max-width: 1100px;
       margin: 0 auto;
       padding: 16px;
     }
 
-    .top{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:12px;
+    .top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
       margin-bottom: 14px;
       padding: 14px 16px;
       border: 1px solid var(--border-color);
@@ -28,34 +29,37 @@
       box-shadow: var(--shadow);
     }
 
-    /* Навигация: каждый пункт отдельной строкой, на всю ширину */
-    .nav{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
+    /* Навигация */
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
       margin: 14px 0 18px 0;
     }
-    .nav .nav-card{
-      display:block;
-      width:100%;
-      padding:16px;
-      border:1px solid var(--border-color);
-      background:var(--bg-card);
-      border-radius:16px;
-      box-shadow:var(--shadow);
-      text-decoration:none;
-      color:var(--text);
+
+    .nav-card {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      text-decoration: none;
+      color: var(--text-main);
       transition: transform .08s ease, filter .08s ease;
     }
-    .nav .nav-card:hover{
+
+    .nav-card:hover {
       transform: translateY(-1px);
       filter: brightness(1.05);
     }
-    .nav .h{ font-size:18px; font-weight:700; margin:0 0 6px 0; }
-    .nav .p{ margin:0; color:var(--muted); }
 
-    /* Панель отчёта */
-    .panel{
+    .nav .h { font-size: 18px; font-weight: 700; margin: 0 0 6px 0; }
+    .nav .p { margin: 0; color: var(--text-muted); }
+
+    /* Панели и таблицы */
+    .panel {
       margin-top: 14px;
       padding: 14px 16px;
       border: 1px solid var(--border-color);
@@ -64,42 +68,47 @@
       box-shadow: var(--shadow);
     }
 
-    /* Обёртка таблицы */
-    .table-wrap{
+    .table-wrap {
       margin-top: 10px;
-      overflow:auto;
-      border:1px solid var(--border-color);
-      border-radius:14px;
+      overflow: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
     }
 
-    /* ЖЁСТКИЕ стили границ — чтобы ничего не перетёрлось базовыми CSS */
-    table.r1_table{
-      width:100%;
-      border-collapse:collapse;
-      border:1px solid var(--border-color);
+    /* Стили таблицы r1_table */
+    table.r1_table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-main);
     }
+
     table.r1_table th,
-    table.r1_table td{
-      border:1px solid var(--border-color);
-      padding:10px 12px;
+    table.r1_table td {
+      border: 1px solid var(--border-color);
+      padding: 10px 12px;
+      color: var(--text-main);
     }
-    table.r1_table thead th{
-      background: var(--panel2);
-      text-align:left;
-      font-weight:700;
+
+    table.r1_table thead th {
+      background: var(--panel2); /* Эта переменная теперь меняется в base.css */
+      text-align: left;
+      font-weight: 700;
       position: sticky;
       top: 0;
       z-index: 1;
     }
+
     table.r1_table td.num,
-    table.r1_table th.num{
-      text-align:right;
-      width:240px;
-      white-space:nowrap;
+    table.r1_table th.num {
+      text-align: right;
+      width: 240px;
+      white-space: nowrap;
       font-variant-numeric: tabular-nums;
     }
-    table.r1_table tbody tr:hover td{
-      background: rgba(255,255,255,.03);
+
+    /* Эффект наведения на строки */
+    table.r1_table tbody tr:hover td {
+      background: var(--table-hover);
     }
   </style>
 </head>

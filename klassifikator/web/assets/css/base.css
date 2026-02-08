@@ -7,9 +7,11 @@
   --border-color: #dee2e6;
   --accent-color: #007bff;
   --tree-plus: #007bff; /* Цвет плюсиков */
-  --line: var(--border-color); /* Алиас */
-  --panel: var(--bg-card);      /* Алиас */
-  --panel2: var(--bg-card);
+
+  /* Совместимость со старым кодом в HTML */
+  --line: var(--border-color);
+  --panel: var(--bg-card);
+  --panel2: #f8f9fa;
   --text: var(--text-main);
   --muted: var(--text-muted);
 }
@@ -23,6 +25,13 @@ body.dark-theme{
   --border-color: #333333;
   --accent-color: #375a7f;
   --tree-plus: #ffc107; /* Яркий желтый или оранжевый для дерева в темноте */
+
+  /* Переопределяем алиасы для темной темы */
+  --line: var(--border-color);
+  --panel: var(--bg-card);
+  --panel2: #252525;
+  --text: var(--text-main);
+  --muted: var(--text-muted);
 }
 
 *{box-sizing:border-box}
