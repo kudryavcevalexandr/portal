@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const applyTheme = (theme) => {
     const isDark = theme === "dark";
     document.body.classList.toggle("dark-theme", isDark);
+    document.documentElement.classList.toggle("dark-theme", isDark);
     toggle.textContent = isDark ? "Светлая тема" : "Темная тема";
     localStorage.setItem("portal-theme", theme);
   };
@@ -14,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   applyTheme(savedTheme);
 
   toggle.addEventListener("click", () => {
-    const newTheme = document.body.classList.contains("dark-theme") ? "light" : "dark";
+    const newTheme = document.documentElement.classList.contains("dark-theme") ? "light" : "dark";
     applyTheme(newTheme);
   });
 });
