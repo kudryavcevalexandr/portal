@@ -1,11 +1,13 @@
 /* Светлая тема — по умолчанию */
 :root{
-  --bg:#ffffff;
-  --panel:#f3f5f9;
-  --text:#0f172a;
-  --muted:#64748b;
-  --line:#e2e8f0;
-  --panel2:#eef2f7;
+  --bg-main: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-main: #212529;
+  --text-muted: #6c757d;
+  --border-color: #dee2e6;
+  --accent-color: #007bff;
+  --table-hover: #f1f1f1;
+  --tree-plus: #007bff; /* Цвет плюсиков */
 
   --r:16px;
   --shadow:0 10px 30px rgba(0,0,0,.08);
@@ -13,22 +15,24 @@
 }
 
 /* Тёмная тема — через класс на body */
-.dark-theme{
-  --bg:#0b0f14;
-  --panel:#101722;
-  --panel2:#0f1b2c;
-  --text:#e6eefc;
-  --muted:#98a6bd;
-  --line:#1f2a3a;
+body.dark-theme{
+  --bg-main: #121212;
+  --bg-card: #1e1e1e;
+  --text-main: #e0e0e0;
+  --text-muted: #a0a0a0;
+  --border-color: #333333;
+  --accent-color: #375a7f;
+  --table-hover: #2c2c2c;
+  --tree-plus: #ffc107; /* Яркий желтый или оранжевый для дерева в темноте */
   --shadow:0 10px 30px rgba(0,0,0,.35);
 }
 
 *{box-sizing:border-box}
 body{
   margin:0;
-  background:var(--bg);
-  color:var(--text);
+  background:var(--bg-main);
+  color:var(--text-main);
   font-family:var(--sans);
 }
 a{color:inherit;text-decoration:none}
-.muted{color:var(--muted)}
+.muted{color:var(--text-muted)}
