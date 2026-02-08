@@ -1,14 +1,15 @@
-/* Светлая тема — по умолчанию */
-:root{
+/* Переменные */
+:root {
   --bg-main: #ffffff;
   --bg-card: #ffffff;
   --text-main: #1a1d21;
   --text-muted: #6c757d;
   --border-color: #dee2e6;
   --accent-color: #007bff;
-  --tree-plus: #007bff; /* Цвет плюсиков */
+  --tree-plus: #007bff;
+  --table-hover: rgba(0, 0, 0, 0.03);
 
-  /* Совместимость со старым кодом в HTML */
+  /* Алиасы для старого кода в index.html */
   --line: var(--border-color);
   --panel: var(--bg-card);
   --panel2: #f8f9fa;
@@ -16,17 +17,16 @@
   --muted: var(--text-muted);
 }
 
-/* Тёмная тема — через класс на body */
-body.dark-theme{
+body.dark-theme {
   --bg-main: #121212;
   --bg-card: #1e1e1e;
   --text-main: #e0e0e0;
   --text-muted: #9aa0a6;
   --border-color: #333333;
   --accent-color: #375a7f;
-  --tree-plus: #ffc107; /* Яркий желтый или оранжевый для дерева в темноте */
+  --tree-plus: #ffc107;
+  --table-hover: rgba(255, 255, 255, 0.05);
 
-  /* Переопределяем алиасы для темной темы */
   --line: var(--border-color);
   --panel: var(--bg-card);
   --panel2: #252525;
@@ -34,14 +34,30 @@ body.dark-theme{
   --muted: var(--text-muted);
 }
 
-*{box-sizing:border-box}
-body{
-  margin:0;
-  background:var(--bg-main);
-  color:var(--text-main);
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-}
-a{color:inherit;text-decoration:none}
-.muted{color:var(--text-main); opacity:0.7}
+/* Базовые стили */
+* { box-sizing: border-box; }
 
-body { background-color: var(--bg-main) !important; color: var(--text-main) !important; }
+body {
+  margin: 0;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* Улучшенный класс muted */
+.muted, .nav .p, #r1_status { 
+  color: var(--text-muted); 
+}
+
+/* Кнопка */
+.btn {
+  cursor: pointer;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
