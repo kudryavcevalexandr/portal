@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const toggle = document.querySelector("[data-theme-toggle]");
   if (!toggle) return;
   toggle.addEventListener("click", () => {
-    const isDark = document.body.classList.contains(DARK_CLASS);
-    setTheme(isDark ? "light" : "dark");
+    const isDark = document.body.classList.toggle(DARK_CLASS);
+    setTheme(isDark ? "dark" : "light");
   });
 });

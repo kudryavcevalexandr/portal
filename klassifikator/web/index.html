@@ -22,8 +22,8 @@
       gap:12px;
       margin-bottom: 14px;
       padding: 14px 16px;
-      border: 1px solid var(--line);
-      background: var(--panel);
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
       border-radius: 16px;
       box-shadow: var(--shadow);
     }
@@ -39,8 +39,8 @@
       display:block;
       width:100%;
       padding:16px;
-      border:1px solid var(--line);
-      background:var(--panel);
+      border:1px solid var(--border-color);
+      background:var(--bg-card);
       border-radius:16px;
       box-shadow:var(--shadow);
       text-decoration:none;
@@ -58,8 +58,8 @@
     .panel{
       margin-top: 14px;
       padding: 14px 16px;
-      border: 1px solid var(--line);
-      background: var(--panel);
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
       border-radius: 16px;
       box-shadow: var(--shadow);
     }
@@ -68,38 +68,38 @@
     .table-wrap{
       margin-top: 10px;
       overflow:auto;
-      border:1px solid var(--line);
+      border:1px solid var(--border-color);
       border-radius:14px;
     }
 
     /* ЖЁСТКИЕ стили границ — чтобы ничего не перетёрлось базовыми CSS */
     table.r1_table{
-      width:100% !important;
-      border-collapse:collapse !important;
-      border:1px solid var(--line) !important;
+      width:100%;
+      border-collapse:collapse;
+      border:1px solid var(--border-color);
     }
     table.r1_table th,
     table.r1_table td{
-      border:1px solid var(--line) !important;
-      padding:10px 12px !important;
+      border:1px solid var(--border-color);
+      padding:10px 12px;
     }
     table.r1_table thead th{
-      background: var(--panel2) !important;
-      text-align:left !important;
-      font-weight:700 !important;
+      background: var(--panel2);
+      text-align:left;
+      font-weight:700;
       position: sticky;
       top: 0;
       z-index: 1;
     }
     table.r1_table td.num,
     table.r1_table th.num{
-      text-align:right !important;
+      text-align:right;
       width:240px;
       white-space:nowrap;
       font-variant-numeric: tabular-nums;
     }
     table.r1_table tbody tr:hover td{
-      background: rgba(255,255,255,.03) !important;
+      background: rgba(255,255,255,.03);
     }
   </style>
 </head>
