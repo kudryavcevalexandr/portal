@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import logging
 import requests
 import psycopg2
 import psycopg2.extras
@@ -45,7 +46,17 @@ HTTP_TIMEOUT = float(os.getenv("HTTP_TIMEOUT", "60"))
 # Helpers
 # =========================
 
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s %(levelname)s %(message)s",
+)
+logger = logging.getLogger("etl_nomen_to_opensearch")
+
 def pg_conn():
+    logger.warning(
+        "Using hardcoded Postgres connection settings; env vars ignored. "
+        "Target: 172.16.10.129:5432/directus"
+    )
     return psycopg2.connect(
         host="172.16.10.129", port=5432, dbname="directus",
         user="directus", password="f8a9a07ead7fdaa5fabffc68d5df591d"
@@ -56,41 +67,77 @@ def pg_stream(sql):
     try:
         with conn.cursor(name="cur", cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.itersize = BATCH
+            logger.info("Executing SQL: %s", sql)
             cur.execute(sql)
             while True:
                 rows = cur.fetchmany(BATCH)
                 if not rows:
                     break
                 yield [dict(r) for r in rows]
+    except Exception:
+        logger.exception("Postgres streaming failed.")
+        raise
     finally:
         conn.close()
 
 def os_req(method, path, **kwargs):
     url = f"{OPENSEARCH_URL}{path}"
-    return requests.request(method, url, timeout=HTTP_TIMEOUT, **kwargs)
+    logger.debug("OpenSearch request %s %s", method, url)
+    try:
+        response = requests.request(method, url, timeout=HTTP_TIMEOUT, **kwargs)
+    except Exception:
+        logger.exception("OpenSearch request failed: %s %s", method, url)
+        raise
+    logger.debug(
+        "OpenSearch response %s %s -> %s",
+        method,
+        url,
+        response.status_code,
+    )
+    if response.status_code >= 400:
+        logger.error(
+            "OpenSearch error %s %s -> %s: %s",
+            method,
+            url,
+            response.status_code,
+            response.text[:2000],
+        )
+    return response
 
 def index_exists(index):
     r = os_req("GET", f"/{index}")
     return r.status_code == 200
 
 def delete_index(index):
-    r = os_req("DELETE", f"/{index}")
-    if r.status_code not in (200, 404):
-        r.raise_for_status()
+    try:
+        r = os_req("DELETE", f"/{index}")
+        if r.status_code not in (200, 404):
+            r.raise_for_status()
+    except Exception:
+        logger.exception("Failed to delete index: %s", index)
+        raise
 
 def create_index(index, settings, mappings):
     body = {
         "settings": {"index": settings or {"number_of_shards": 1, "number_of_replicas": 0}},
         "mappings": {"properties": mappings or {}}
     }
-    r = os_req("PUT", f"/{index}", json=body)
-    r.raise_for_status()
+    try:
+        r = os_req("PUT", f"/{index}", json=body)
+        r.raise_for_status()
+    except Exception:
+        logger.exception("Failed to create index: %s", index)
+        raise
 
 def truncate_index(index):
     # безопаснее, чем удалять/создавать, но может быть медленнее на больших объёмах
     body = {"query": {"match_all": {}}}
-    r = os_req("POST", f"/{index}/_delete_by_query?conflicts=proceed&refresh=true", json=body)
-    r.raise_for_status()
+    try:
+        r = os_req("POST", f"/{index}/_delete_by_query?conflicts=proceed&refresh=true", json=body)
+        r.raise_for_status()
+    except Exception:
+        logger.exception("Failed to truncate index: %s", index)
+        raise
 
 def bulk_index(index, id_col, rows):
     lines = []
@@ -118,6 +165,7 @@ def bulk_index(index, id_col, rows):
                 bad.append(act.get("error"))
             if len(bad) >= 3:
                 break
+        logger.error("Bulk index errors (first 3): %s", bad)
         raise RuntimeError(f"Bulk errors (first 3): {bad}")
 
 def job_sql(schema, table, fields, order_by):
@@ -142,44 +190,60 @@ def run_job(job):
     print(f"JOB: {schema}.{table}  ->  {index}")
     print(f"fields={fields}, id_col={id_col}, batch={BATCH}")
 
-    if recreate:
-        print("recreate_index=True → deleting index (if exists) ...")
-        delete_index(index)
+    try:
+        if recreate:
+            print("recreate_index=True → deleting index (if exists) ...")
+            delete_index(index)
 
-    if not index_exists(index):
-        print("index not exists → creating ...")
-        create_index(index, settings, mappings)
-        print("created.")
-    else:
-        print("index exists.")
+        if not index_exists(index):
+            print("index not exists → creating ...")
+            create_index(index, settings, mappings)
+            print("created.")
+        else:
+            print("index exists.")
 
-    if trunc:
-        print("truncate_index=True → deleting all docs ...")
-        truncate_index(index)
-        print("cleared.")
+        if trunc:
+            print("truncate_index=True → deleting all docs ...")
+            truncate_index(index)
+            print("cleared.")
+    except Exception:
+        logger.exception("Index preparation failed for %s", index)
+        raise
 
     sql = job_sql(schema, table, fields, order_by)
     total = 0
     t0 = time.time()
-    for batch in pg_stream(sql):
-        bulk_index(index, id_col, batch)
-        total += len(batch)
-        if total % (BATCH * 5) == 0:
-            dt = time.time() - t0
-            print(f"indexed: {total}  ({total/dt:.1f} rows/s)")
+    try:
+        for batch in pg_stream(sql):
+            bulk_index(index, id_col, batch)
+            total += len(batch)
+            if total % (BATCH * 5) == 0:
+                dt = time.time() - t0
+                print(f"indexed: {total}  ({total/dt:.1f} rows/s)")
+    except Exception:
+        logger.exception("Batch indexing failed for index: %s", index)
+        raise
     dt = time.time() - t0
     print(f"DONE: {total} rows in {dt:.1f}s ({total/dt:.1f} rows/s)")
 
 def main():
     # быстрый health-check OS
-    r = os_req("GET", "/")
-    r.raise_for_status()
-    print(f"OpenSearch: {OPENSEARCH_URL} OK")
+    try:
+        r = os_req("GET", "/")
+        r.raise_for_status()
+        print(f"OpenSearch: {OPENSEARCH_URL} OK")
+    except Exception:
+        logger.exception("OpenSearch health-check failed: %s", OPENSEARCH_URL)
+        raise
 
     # pg check
-    conn = pg_conn()
-    conn.close()
-    print(f"Postgres: {PG_HOST}:{PG_PORT}/{PG_DB} OK")
+    try:
+        conn = pg_conn()
+        conn.close()
+        print(f"Postgres: {PG_HOST}:{PG_PORT}/{PG_DB} OK")
+    except Exception:
+        logger.exception("Postgres connection check failed.")
+        raise
 
     for job in JOBS:
         run_job(job)
