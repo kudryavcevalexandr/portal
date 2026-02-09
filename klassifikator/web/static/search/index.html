@@ -6,7 +6,7 @@
   <title>Поиск номенклатуры</title>
   <style>
     :root{
-      --bg:#ffffff; --panel:#f8fafc; --panel2:#eef2f7;
+      --bg:#ffffff; --bg-card:#f8fafc; --panel2:#eef2f7;
       --text:#0f172a; --muted:#64748b; --line:#e2e8f0;
       --shadow: 0 10px 30px rgba(15,23,42,.08);
       --r: 16px; --ok:#059669; --bad:#e11d48; --warn:#d97706;
@@ -26,7 +26,7 @@
     }
     @media (prefers-color-scheme: dark){
       :root{
-        --bg:#0b0f14; --panel:#101722; --panel2:#0f1620;
+        --bg:#0b0f14; --bg-card:#101722; --panel2:#0f1620;
         --text:#e6eefc; --muted:#98a6bd; --line:#1f2a3a;
         --shadow: 0 10px 30px rgba(0,0,0,.35);
         --r: 16px; --ok:#34d399; --bad:#fb7185; --warn:#fbbf24;
@@ -66,7 +66,7 @@
     .brand .s{font-size:12px;color:var(--muted)}
     .search{
       flex:1; display:flex; align-items:center; gap:10px;
-      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      background: linear-gradient(180deg, var(--bg-card), var(--panel2));
       border:1px solid var(--panel-border);
       border-radius:999px;
       padding:10px 14px;
@@ -97,7 +97,7 @@
     .btn:active{transform: translateY(1px)}
     .btn:hover{border-color: color-mix(in srgb, var(--tag-text) 55%, transparent)}
     .panel{
-      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      background: linear-gradient(180deg, var(--bg-card), var(--panel2));
       border:1px solid var(--panel-border);
       border-radius: var(--r);
       box-shadow: var(--shadow);
