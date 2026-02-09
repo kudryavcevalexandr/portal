@@ -6,12 +6,33 @@
   <title>Поиск номенклатуры</title>
   <style>
     :root{
+      --r: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    :root[data-theme="dark"]{
+      --bg:#0b0f14; --bg-card:#101722; --panel2:#0f1620;
+      --text:#e6eefc; --muted:#98a6bd; --line:#1f2a3a;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --ok:#34d399; --bad:#fb7185; --warn:#fbbf24;
+      --glow-1: rgba(110,231,255,.10);
+      --glow-2: rgba(167,139,250,.10);
+      --top-bg: rgba(11,15,20,.65);
+      --top-border: rgba(31,42,58,.65);
+      --panel-border: rgba(31,42,58,.9);
+      --chip-bg: rgba(16,23,34,.7);
+      --chip-border: rgba(31,42,58,.9);
+      --tag-bg: rgba(11,15,20,.35);
+      --tag-text: #cfe3ff;
+      --score-bg: rgba(110,231,255,.08);
+      --mark-bg: rgba(110,231,255,.18);
+    }
+    :root[data-theme="light"],
+    :root:not([data-theme]){
       --bg:#ffffff; --bg-card:#f8fafc; --panel2:#eef2f7;
       --text:#0f172a; --muted:#64748b; --line:#e2e8f0;
       --shadow: 0 10px 30px rgba(15,23,42,.08);
-      --r: 16px; --ok:#059669; --bad:#e11d48; --warn:#d97706;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --ok:#059669; --bad:#e11d48; --warn:#d97706;
       --glow-1: rgba(14,165,233,.16);
       --glow-2: rgba(124,58,237,.16);
       --top-bg: rgba(255,255,255,.85);
@@ -25,11 +46,11 @@
       --mark-bg: rgba(14,165,233,.22);
     }
     @media (prefers-color-scheme: dark){
-      :root{
+      :root:not([data-theme]){
         --bg:#0b0f14; --bg-card:#101722; --panel2:#0f1620;
         --text:#e6eefc; --muted:#98a6bd; --line:#1f2a3a;
         --shadow: 0 10px 30px rgba(0,0,0,.35);
-        --r: 16px; --ok:#34d399; --bad:#fb7185; --warn:#fbbf24;
+        --ok:#34d399; --bad:#fb7185; --warn:#fbbf24;
         --glow-1: rgba(110,231,255,.10);
         --glow-2: rgba(167,139,250,.10);
         --top-bg: rgba(11,15,20,.65);
