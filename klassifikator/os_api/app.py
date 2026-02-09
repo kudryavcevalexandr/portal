@@ -61,62 +61,58 @@ def health():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
-@app.get("/search")
-def search():
+@app.get("/api/v1/search")
+def universal_search():
     q = (request.args.get("q") or "").strip()
-    size = int(request.args.get("size") or "10")
     index = (request.args.get("index") or DEFAULT_INDEX).strip()
+    size = int(request.args.get("size") or "20")
 
     if not q:
-        return jsonify({"error": "q is required"}), 400
+        return jsonify({"total": 0, "rows": []})
+
+    index_config = {
+        "class_tree_v1": {
+            "fields": SEARCH_FIELDS,
+            "source": ["l4_name", "path_name", "l4_code"]
+        },
+        "class_tree_nomen_v1": {
+            "fields": ["item_name^3", "id"],
+            "source": ["item_name", "id"]
+        },
+        "v_nomenclature_spec_pairs_v1": {
+            "fields": ["name_tek^2", "name_tep_korr^2", "id"],
+            "source": ["id", "name_tek", "name_tep_korr"]
+        }
+    }
+
+    cfg = index_config.get(index, {"fields": ["*"], "source": True})
 
     body = {
         "size": size,
+        "_source": cfg["source"],
         "query": {
             "multi_match": {
                 "query": q,
-                "fields": SEARCH_FIELDS,
-                "type": "best_fields"
+                "fields": cfg["fields"],
+                "type": "best_fields",
+                "fuzziness": "AUTO"
             }
         }
     }
 
-    url = f"{OPENSEARCH_URL}/{index}/_search"
-    r = requests.post(url, json=body, timeout=TIMEOUT)
-    return (r.text, r.status_code, {"Content-Type": "application/json"})
+    try:
+        url = f"{OPENSEARCH_URL}/{index}/_search"
+        r = requests.post(url, json=body, timeout=TIMEOUT)
+        r.raise_for_status()
 
-@app.get("/nomen_search")
-def nomen_search():
-    q = (request.args.get("q") or "").strip()
-    size = int(request.args.get("size") or "10")
-    index = DEFAULT_INDEX
+        data = r.json()
+        hits_data = data.get("hits", {})
+        total = hits_data.get("total", {}).get("value", 0)
+        rows = [h["_source"] for h in hits_data.get("hits", [])]
 
-    if not q:
-        return jsonify({"error": "q is required"}), 400
-
-    body = {
-        "size": size,
-        "query": {
-            "multi_match": {
-                "query": q,
-                "fields": ["item_name^4", "l4_code^2"],
-                "type": "best_fields"
-            }
-        }
-    }
-
-    url = f"{OPENSEARCH_URL}/{index}/_search"
-    r = requests.post(url, json=body, timeout=TIMEOUT)
-    if r.status_code >= 300:
-        return (r.text, r.status_code, {"Content-Type": "application/json"})
-
-    data = r.json()
-    hits = (data.get("hits") or {}).get("hits") or []
-    rows = []
-    for hit in hits:
-        rows.append(hit.get("_source") or {})
-
-    return jsonify(rows)
+        return jsonify({"total": total, "rows": rows})
+    except Exception as e:
+        return jsonify({"error": str(e), "total": 0, "rows": []}), 500
     
 @app.get("/pairs_list")
 def pairs_list():
@@ -141,49 +137,6 @@ limit %(limit)s offset %(offset)s
 
     return jsonify({"rows": rows, "total": cnt, "limit": limit, "offset": offset})
 
-@app.get("/pairs_search")
-def pairs_search():
-    q = (request.args.get("q") or "").strip()
-    size = int(request.args.get("size") or "100")
-    index = (request.args.get("index") or "v_nomenclature_spec_pairs_v1").strip()
-
-    if not q:
-        return jsonify({"error": "q is required"}), 400
-
-    body = {
-        "size": size,
-        "_source": ["id", "name_tek", "name_tep_korr"],
-        "query": {
-            "multi_match": {
-                "query": q,
-                "fields": ["name_tek^3", "name_tep_korr^4"],
-                "type": "best_fields"
-            }
-        }
-    }
-
-    url = f"{OPENSEARCH_URL}/{index}/_search"
-    r = requests.post(url, json=body, timeout=TIMEOUT)
-
-    if r.status_code >= 300:
-        return (r.text, r.status_code, {"Content-Type": "application/json"})
-
-    data = r.json()
-    hits = (data.get("hits") or {})
-    total = hits.get("total") or 0
-    if isinstance(total, dict):
-        total = total.get("value") or 0
-
-    rows = []
-    for h in (hits.get("hits") or []):
-        src = h.get("_source") or {}
-        rows.append({
-            "id": src.get("id"),
-            "name_tek": src.get("name_tek"),
-            "name_tep_korr": src.get("name_tep_korr"),
-        })
-
-    return jsonify({"total": total, "rows": rows})
 
 @app.get("/pairs_rows")
 def pairs_rows():
@@ -234,25 +187,6 @@ def reindex_nomen():
     threading.Thread(target=run, daemon=True).start()
     return jsonify({"ok": True, "message": "Nomenclature reindex started"})
 
-@app.get("/nomen/search")
-def nomen_search_api():
-    q = request.args.get("q", "").strip()
-    if not q:
-        return jsonify({"rows": []})
-
-    body = {
-        "size": 50,
-        "query": {
-            "match": {"item_name": {"query": q, "fuzziness": "AUTO"}}
-        }
-    }
-    url = f"{OPENSEARCH_URL}/class_tree_nomen_v1/_search"
-    r = requests.post(url, json=body, timeout=TIMEOUT)
-    if r.status_code != 200:
-        return (r.text, r.status_code)
-
-    hits = r.json().get("hits", {}).get("hits", [])
-    return jsonify({"rows": [h["_source"] for h in hits]})
 
 @app.patch("/pairs_update/<int:row_id>")
 def pairs_update(row_id: int):
