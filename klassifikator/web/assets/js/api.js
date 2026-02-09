@@ -34,7 +34,7 @@ async function directusGet(path, params) {
   return data;
 }
 
-async function directusReadItems(collection, { fields, limit = 200, offset = 0, sort = null, filter = null } = {}) {
+export async function directusReadItems(collection, { fields, limit = 200, offset = 0, sort = null, filter = null } = {}) {
   const params = { limit: String(limit), offset: String(offset) };
   if (fields?.length) params.fields = fields.join(",");
   if (sort) params.sort = sort;
