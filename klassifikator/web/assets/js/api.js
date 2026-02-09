@@ -59,10 +59,20 @@ async function directusUpdateItem(collection, id, patch) {
   return directusPatch(`/items/${collection}/${encodeURIComponent(id)}`, patch);
 }
 
+// ---------- OpenSearch ----------
+async function searchOpenSearch(q, { index = null, size = null } = {}) {
+  const params = {};
+  if (q != null) params.q = q;
+  if (index) params.index = index;
+  if (size != null) params.size = String(size);
+  return apiGet("/v1/search", params);
+}
+
 // Экспортируем то, что нужно страницам
 export {
   apiUrl, apiGet,
   directusUrl, directusGet,
   directusReadItems,
-  directusUpdateItem
+  directusUpdateItem,
+  searchOpenSearch
 };
