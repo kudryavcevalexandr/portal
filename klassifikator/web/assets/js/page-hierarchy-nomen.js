@@ -238,7 +238,7 @@ function render() {
         }
       };
 
-      const debouncedSave = debounce(() => saveAction(inp.value), 1000);
+      const debouncedSave = debounce(() => saveAction(inp.value), 2000);
 
       // Сохранение при наборе (с задержкой 1 сек)
       inp.addEventListener("input", debouncedSave);
