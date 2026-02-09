@@ -12,7 +12,7 @@
   /* Алиасы для старого кода в index.html */
   --line: var(--border-color);
   --panel: var(--bg-card);
-  --panel2: #f8f9fa;
+  --panel2: var(--bg-card);
   --text: var(--text-main);
   --muted: var(--text-muted);
 }
@@ -29,13 +29,13 @@ body.dark-theme {
 
   --line: var(--border-color);
   --panel: var(--bg-card);
-  --panel2: #252525;
+  --panel2: var(--bg-card);
   --text: var(--text-main);
   --muted: var(--text-muted);
 }
 
 html.dark-theme {
-  background-color: #121212;
+  background-color: var(--bg-main);
 }
 
 /* Базовые стили */
