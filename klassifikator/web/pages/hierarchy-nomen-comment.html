@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <script>
+    (function() {
+      if (localStorage.getItem("portal-theme") === "dark") {
+        document.documentElement.classList.add("dark-theme");
+      }
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Классификатор + номенклатура</title>
+
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/table.css">
+
+  <style>
+	/* Страница hierarchy-nomen: растянуть на всю ширину */
+	.wrap{
+	  max-width: none !important;   /* снимаем ограничение */
+	  width: 100%;
+	}
+
+	.panel{
+	  width: 100%;
+	}
+
+	/* чтобы таблица точно занимала весь доступный контейнер */
+	.table-wrap{
+	  width: 100%;
+	}
+	#treeTable{
+	  width: 100%;
+	}
+  
+    .toolbar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .toolbar .spacer{ flex:1; }
+    .pill{ padding:6px 10px; border-radius:999px; border:1px solid var(--line); color:var(--muted); }
+    .muted{ color:var(--muted); }
+    .w-100{ width:100%; }
+    .td-right{ text-align:right; }
+    .td-center{ text-align:center; }
+    .note-input{
+      width:100%;
+      min-width:0;
+      box-sizing:border-box;
+      padding:6px 8px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background: var(--panel);
+      color: var(--text);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header class="panel">
+      <div class="toolbar">
+        <h1 style="margin:0;">Классификатор - позиции на согласование</h1>
+        <span id="stat" class="pill">—</span>
+        <span class="spacer"></span>
+        <button class="btn" type="button" data-theme-toggle aria-pressed="false">Темная тема</button>
+        <button id="btnToggleAll" class="btn">Развернуть всё</button>
+        <button id="btnReload" class="btn">Обновить</button>
+      </div>
+      <p class="muted" style="margin:10px 0 0;">
+        Дерево L1–L3 + позиции L4 (dup_root_id) из таблицы <b>public.class_tree_nomen_v1</b>.
+      </p>
+    </header>
+
+    <main class="panel">
+      <div class="table-wrap">
+        <table class="table w-100" id="treeTable">
+          <thead>
+            <tr>
+              <th style="width:120px;">Код</th>
+              <th>Наименование</th>
+              <th style="width:70px;">Ур.</th>
+              <th style="width:130px;" class="td-right">Количество на согласование</th>
+              <th style="width:90px;">Ед. изм.</th>
+              <th style="width:110px;" class="td-center">Позиция согласована</th>
+              <th style="width:360px;">Примечания</th>
+            </tr>
+          </thead>
+          <tbody id="treeBody">
+            <tr><td colspan="7" class="muted" style="padding:14px;">Загрузка…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="/assets/js/ui.js"></script>
+  <script type="module" src="/assets/js/page-hierarchy-nomen.js"></script>
+</body>
+</html>
