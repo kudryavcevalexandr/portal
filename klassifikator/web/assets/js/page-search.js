@@ -1,3 +1,5 @@
+import { apiGet } from "./api.js"; // fixed import/export
+
 function el(id){ return document.getElementById(id); }
 
 function pretty(n){
