@@ -6,6 +6,7 @@ CREATE TABLE public.v_nomenclature_spec_pairs_processed_v1 (
     unit_measure text,-- ед изм
     note text,-- примечание
     classifier_binding bigint,-- привязка классификатора
+				l3_id bigint REFERENCES public.class_L3(id), -- связываю с классификатором 3й уровень
     processed_name text-- наименование после обработки алгоритмами
 );
 
