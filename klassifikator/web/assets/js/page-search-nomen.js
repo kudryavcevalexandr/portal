@@ -24,10 +24,6 @@
     tableBody.innerHTML = "";
   }
 
-  function isCodeQuery(value){
-    return /^[0-9.]+$/.test(value);
-  }
-
   function renderRows(rows){
     clearTable();
 
@@ -43,7 +39,7 @@
 
       const tdCode = document.createElement("td");
       tdCode.className = "code";
-      tdCode.textContent = row.l4_code ?? "";
+      tdCode.textContent = row.id ?? "";
 
       const tdName = document.createElement("td");
       tdName.className = "name";
@@ -83,11 +79,9 @@
       return;
     }
 
-    const field = isCodeQuery(q) ? "l4_code" : "item_name";
-    const query = `${field}:${q}`;
-    const url = new URL("/api/search", window.location.origin);
+    const url = new URL("/api/v1/search", window.location.origin);
     url.searchParams.set("index", "class_tree_nomen_v1");
-    url.searchParams.set("q", query);
+    url.searchParams.set("q", q);
 
     setStatus("Идет поиск...");
 
