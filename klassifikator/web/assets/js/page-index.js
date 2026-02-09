@@ -24,7 +24,7 @@ function ensureReport1Styles(){
   const css = `
   /* Report1 table */
   #r1_table { width:100%; border-collapse:separate; border-spacing:0; }
-  #r1_table th, #r1_table td { padding:10px 12px; border-bottom:1px solid var(--line); }
+  #r1_table th, #r1_table td { padding:10px 12px; border-bottom:1px solid var(--border-color); }
   #r1_table thead th {
     position: sticky; top: 0;
     background: rgba(16, 23, 34, .95);
@@ -35,7 +35,7 @@ function ensureReport1Styles(){
   #r1_table tbody tr:hover td { background: rgba(255,255,255,.03); }
   #r1_table td.num, #r1_table th.num { text-align:right; font-variant-numeric: tabular-nums; }
   #r1_table td:first-child { width: 70%; }
-  .r1_wrap { overflow:auto; border:1px solid var(--line); border-radius: 14px; }
+  .r1_wrap { overflow:auto; border:1px solid var(--border-color); border-radius: 14px; }
   .r1_badge { color: var(--muted); font-size: 12px; }
   `;
 

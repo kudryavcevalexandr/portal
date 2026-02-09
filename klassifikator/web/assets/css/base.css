@@ -1,3 +1,7 @@
+html.dark-theme {
+  background-color: var(--bg-main);
+}
+
 /* Переменные */
 :root {
   --bg-main: #ffffff;
@@ -32,10 +36,6 @@ body.dark-theme {
   --panel2: var(--bg-card);
   --text: var(--text-main);
   --muted: var(--text-muted);
-}
-
-html.dark-theme {
-  background-color: var(--bg-main);
 }
 
 /* Базовые стили */

@@ -19,7 +19,7 @@
   <style>
 	/* Страница hierarchy-nomen: растянуть на всю ширину */
 	.wrap{
-	  max-width: none !important;   /* снимаем ограничение */
+	  max-width: none;   /* снимаем ограничение */
 	  width: 100%;
 	}
 
@@ -37,7 +37,7 @@
   
     .toolbar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     .toolbar .spacer{ flex:1; }
-    .pill{ padding:6px 10px; border-radius:999px; border:1px solid var(--line); color:var(--muted); }
+    .pill{ padding:6px 10px; border-radius:999px; border:1px solid var(--border-color); color:var(--muted); }
     .muted{ color:var(--muted); }
     .w-100{ width:100%; }
     .td-right{ text-align:right; }
@@ -47,9 +47,9 @@
       min-width:0;
       box-sizing:border-box;
       padding:6px 8px;
-      border:1px solid var(--line);
+      border:1px solid var(--border-color);
       border-radius:10px;
-      background: var(--panel);
+      background: var(--bg-card);
       color: var(--text);
     }
   </style>
