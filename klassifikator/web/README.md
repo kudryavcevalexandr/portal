@@ -23,6 +23,7 @@ web/
 ├─ pages/  # HTML-страницы портала
 │  ├─ about.html  # (пример будущей страницы)
 │  ├─ hierarchy-nomen.html  # построение дерева классификатора
+│  ├─ hierarchy-nomen-comment.html  # копия hierarchy-nomen для отдельного редактирования
 │  ├─ hierarchy.html  # Страница: иерархичная таблица L1→L4
 │  ├─ pairs_edit.html  # правка позиций - временная
 │  ├─ search.html  # Страница: поиск (отдельно)
