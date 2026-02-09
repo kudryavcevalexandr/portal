@@ -84,6 +84,39 @@ def search():
     url = f"{OPENSEARCH_URL}/{index}/_search"
     r = requests.post(url, json=body, timeout=TIMEOUT)
     return (r.text, r.status_code, {"Content-Type": "application/json"})
+
+@app.get("/nomen_search")
+def nomen_search():
+    q = (request.args.get("q") or "").strip()
+    size = int(request.args.get("size") or "10")
+    index = DEFAULT_INDEX
+
+    if not q:
+        return jsonify({"error": "q is required"}), 400
+
+    body = {
+        "size": size,
+        "query": {
+            "multi_match": {
+                "query": q,
+                "fields": ["item_name^4", "l4_code^2"],
+                "type": "best_fields"
+            }
+        }
+    }
+
+    url = f"{OPENSEARCH_URL}/{index}/_search"
+    r = requests.post(url, json=body, timeout=TIMEOUT)
+    if r.status_code >= 300:
+        return (r.text, r.status_code, {"Content-Type": "application/json"})
+
+    data = r.json()
+    hits = (data.get("hits") or {}).get("hits") or []
+    rows = []
+    for hit in hits:
+        rows.append(hit.get("_source") or {})
+
+    return jsonify(rows)
     
 @app.get("/pairs_list")
 def pairs_list():
