@@ -229,10 +229,30 @@ def reindex_nomen():
         try:
             subprocess.run(["python3", script], check=True)
         except Exception as e:
-            print("reindex_nomen failed:", e)
+            print("Nomen reindex failed:", e)
 
     threading.Thread(target=run, daemon=True).start()
-    return jsonify({"ok": True, "started": True})
+    return jsonify({"ok": True, "message": "Nomenclature reindex started"})
+
+@app.get("/nomen/search")
+def nomen_search_api():
+    q = request.args.get("q", "").strip()
+    if not q:
+        return jsonify({"rows": []})
+
+    body = {
+        "size": 50,
+        "query": {
+            "match": {"item_name": {"query": q, "fuzziness": "AUTO"}}
+        }
+    }
+    url = f"{OPENSEARCH_URL}/class_tree_nomen_v1/_search"
+    r = requests.post(url, json=body, timeout=TIMEOUT)
+    if r.status_code != 200:
+        return (r.text, r.status_code)
+
+    hits = r.json().get("hits", {}).get("hits", [])
+    return jsonify({"rows": [h["_source"] for h in hits]})
 
 @app.patch("/pairs_update/<int:row_id>")
 def pairs_update(row_id: int):
