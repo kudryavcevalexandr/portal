@@ -70,13 +70,19 @@ def search():
     if not q:
         return jsonify({"error": "q is required"}), 400
 
+    if index == "class_tree_nomen_v1":
+        fields = ["item_name^3", "id"]
+    else:
+        fields = SEARCH_FIELDS
+
     body = {
         "size": size,
         "query": {
             "multi_match": {
                 "query": q,
-                "fields": SEARCH_FIELDS,
-                "type": "best_fields"
+                "fields": fields,
+                "type": "best_fields",
+                "fuzziness": "AUTO"
             }
         }
     }
