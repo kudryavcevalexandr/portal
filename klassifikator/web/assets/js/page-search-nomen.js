@@ -1,120 +1,112 @@
-(function(){
-  const el = (id) => document.getElementById(id);
+import { searchOpenSearch } from "./api.js";
 
-  const input = el("q");
-  const btnSearch = el("btnSearch");
-  const btnReindex = el("btnReindex");
-  const tableBody = el("resultsBody");
-  const status = el("status");
+const el = (id) => document.getElementById(id);
 
-  function escapeHtml(value){
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
+const input = el("q");
+const btnSearch = el("btnSearch");
+const btnReindex = el("btnReindex");
+const tableBody = el("resultsBody");
+const status = el("status");
 
-  function setStatus(text){
-    status.textContent = text || "";
-  }
+function escapeHtml(value){
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
-  function clearTable(){
-    tableBody.innerHTML = "";
-  }
+function setStatus(text){
+  if (status) status.textContent = text || "";
+}
 
-  function renderRows(rows){
-    clearTable();
+function clearTable(){
+  if (tableBody) tableBody.innerHTML = "";
+}
 
-    if (!rows.length) {
+function renderRows(rows){
+  clearTable();
+
+  if (!rows || !rows.length) {
+    if (tableBody) {
       tableBody.innerHTML = `<tr><td colspan="2" class="muted">Ничего не найдено</td></tr>`;
-      return;
     }
+    return;
+  }
 
-    const frag = document.createDocumentFragment();
+  const frag = document.createDocumentFragment();
 
-    rows.forEach((row) => {
-      const tr = document.createElement("tr");
+  rows.forEach((row) => {
+    const tr = document.createElement("tr");
 
-      const tdCode = document.createElement("td");
-      tdCode.className = "code";
-      tdCode.textContent = row.id ?? "";
+    const tdCode = document.createElement("td");
+    tdCode.className = "code";
+    tdCode.textContent = row.id ?? "";
 
-      const tdName = document.createElement("td");
-      tdName.className = "name";
-      tdName.innerHTML = `<span class="ellipsis">${escapeHtml(row.item_name ?? "")}</span>`;
+    const tdName = document.createElement("td");
+    tdName.className = "name";
+    tdName.innerHTML = `<span class="ellipsis">${escapeHtml(row.item_name ?? "")}</span>`;
 
-      tr.appendChild(tdCode);
-      tr.appendChild(tdName);
-      frag.appendChild(tr);
+    tr.appendChild(tdCode);
+    tr.appendChild(tdName);
+    frag.appendChild(tr);
+  });
+
+  if (tableBody) tableBody.appendChild(frag);
+}
+
+async function runSearch(){
+  const q = (input?.value || "").trim();
+  clearTable();
+
+  if (!q) {
+    if (tableBody) {
+      tableBody.innerHTML = `<tr><td colspan="2" class="muted">Введите запрос и нажмите «Найти»</td></tr>`;
+    }
+    setStatus("");
+    return;
+  }
+
+  setStatus("Идет поиск...");
+
+  try {
+    const data = await searchOpenSearch(q, {
+      index: "class_tree_nomen_v1",
+      size: 50
     });
 
-    tableBody.appendChild(frag);
-  }
+    const rows = data.rows || [];
+    const total = data.total ?? rows.length;
 
-  function normalizeResponse(data){
-    if (Array.isArray(data?.rows)) {
-      return {
-        rows: data.rows,
-        total: data.total ?? data.rows.length
-      };
+    renderRows(rows);
+    setStatus(`Найдено строк: ${total}`);
+  } catch (err) {
+    console.error(err);
+    if (tableBody) {
+      tableBody.innerHTML = `<tr><td colspan="2" class="muted">Ошибка: ${escapeHtml(err.message)}</td></tr>`;
     }
-
-    const hits = data?.hits?.hits || [];
-    const total = data?.hits?.total?.value ?? data?.hits?.total ?? hits.length;
-    return {
-      rows: hits.map((hit) => hit?._source || {}),
-      total
-    };
+    setStatus("Не удалось получить данные");
   }
+}
 
-  async function runSearch(){
-    const q = (input.value || "").trim();
-    clearTable();
-
-    if (!q) {
-      tableBody.innerHTML = `<tr><td colspan="2" class="muted">Введите запрос и нажмите «Найти»</td></tr>`;
-      setStatus("");
-      return;
-    }
-
-    const url = new URL("/api/v1/search", window.location.origin);
-    url.searchParams.set("index", "class_tree_nomen_v1");
-    url.searchParams.set("q", q);
-
-    setStatus("Идет поиск...");
-
-    try{
-      const res = await fetch(url.toString(), { headers: { "Accept": "application/json" }});
-      if (!res.ok) {
-        const text = await res.text();
-        tableBody.innerHTML = `<tr><td colspan="2" class="muted">${escapeHtml(text)}</td></tr>`;
-        setStatus(`Ошибка поиска: ${res.status}`);
-        return;
-      }
-
-      const data = await res.json();
-      const normalized = normalizeResponse(data);
-
-      renderRows(normalized.rows || []);
-      setStatus(`Найдено строк: ${normalized.total ?? (normalized.rows || []).length}`);
-    }catch(err){
-      tableBody.innerHTML = `<tr><td colspan="2" class="muted">Ошибка запроса</td></tr>`;
-      setStatus("Не удалось получить данные");
-    }
-  }
-
-  btnSearch.addEventListener("click", runSearch);
+if (btnSearch) btnSearch.addEventListener("click", runSearch);
+if (input) {
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
       runSearch();
     }
   });
+}
 
+if (btnReindex) {
   btnReindex.addEventListener("click", async () => {
-    await fetch("/api/reindex_nomen", { method: "POST" });
-    alert("Синхронизация запущена, подождите 10 секунд");
+    try {
+      await fetch("/api/reindex_nomen", { method: "POST" });
+      alert("Синхронизация запущена, подождите 10 секунд");
+    } catch (e) {
+      alert("Ошибка запуска реиндексации");
+    }
   });
-})();
+}
