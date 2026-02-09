@@ -227,21 +227,25 @@ function render() {
       inp.value = row.note || "";
       inp.placeholder = "Примечание…";
 
-      const save = debounce(async () => {
-        inp.disabled = true;
+      // Функция сохранения (без блокировки поля)
+      const saveAction = async (val) => {
         try {
-          const resp = await directusUpdateItem(COLLECTION, row.id, { note: inp.value });
+          const resp = await directusUpdateItem(COLLECTION, row.id, { note: val });
           const updated = resp?.data ?? resp;
-          row.note = updated?.note ?? inp.value;
+          row.note = updated?.note ?? val;
         } catch (e) {
-          console.error(e);
-          alert("Не удалось сохранить note (см. консоль).");
-        } finally {
-          inp.disabled = false;
+          console.error("Ошибка сохранения:", e);
         }
-      }, 450);
+      };
 
-      inp.addEventListener("input", () => save());
+      const debouncedSave = debounce(() => saveAction(inp.value), 1000);
+
+      // Сохранение при наборе (с задержкой 1 сек)
+      inp.addEventListener("input", debouncedSave);
+
+      // Сохранение при потере фокуса (мгновенно)
+      inp.addEventListener("change", () => saveAction(inp.value));
+
       tdNote.appendChild(inp);
     }
     tr.appendChild(tdNote);
