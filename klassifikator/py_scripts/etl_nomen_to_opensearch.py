@@ -15,14 +15,13 @@ JOBS = [
         "schema": "public",
         "table": "class_tree_nomen_v1",
         "index": "class_tree_nomen_v1",
-        "id_col": "id",
-        "fields": ["id", "item_name"],
-        "order_by": "id",
+        "id_col": "item_name",
+        "fields": ["item_name"],
+        "order_by": "item_name",
         "recreate_index": False,   # True = удалить индекс и создать заново
         "truncate_index": True,    # True = очистить документы (DELETE BY QUERY match_all)
         "settings": {"number_of_shards": 1, "number_of_replicas": 0},
         "mappings": {
-            "id": {"type": "integer"},
             "item_name": {"type": "text"},
         }
     },
