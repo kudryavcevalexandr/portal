@@ -9,20 +9,21 @@ import psycopg2.extras
 # CONFIG (правишь тут)
 # =========================
 
-SQL_QUERY = "SELECT * FROM public.class_tree_nomen_v1"
-
 JOBS = [
     {
         "schema": "public",
         "table": "class_tree_nomen_v1",
         "index": "class_tree_nomen_v1",
         "id_col": "id",
-        "fields": ["id"],
+        "fields": ["id", "item_name"],
         "order_by": "id",
-        "recreate_index": False,
-        "truncate_index": True,
+        "recreate_index": False,   # True = удалить индекс и создать заново
+        "truncate_index": True,    # True = очистить документы (DELETE BY QUERY match_all)
         "settings": {"number_of_shards": 1, "number_of_replicas": 0},
-        "mappings": {}
+        "mappings": {
+            "id": {"type": "integer"},
+            "item_name": {"type": "text"},
+        }
     },
 ]
 
@@ -120,7 +121,9 @@ def bulk_index(index, id_col, rows):
         raise RuntimeError(f"Bulk errors (first 3): {bad}")
 
 def job_sql(schema, table, fields, order_by):
-    return SQL_QUERY
+    cols = ", ".join(fields)
+    ob = order_by or fields[0]
+    return f"select {cols} from {schema}.{table} order by {ob}"
 
 def run_job(job):
     schema = job["schema"]
