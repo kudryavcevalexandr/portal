@@ -226,6 +226,19 @@ def reindex():
     threading.Thread(target=run, daemon=True).start()
     return jsonify({"ok": True, "started": True})
 
+@app.post("/reindex_nomen")
+def reindex_nomen():
+    script = "/scripts/etl_nomen_to_opensearch.py"
+
+    def run():
+        try:
+            subprocess.run(["python3", script], check=True)
+        except Exception as e:
+            print("reindex_nomen failed:", e)
+
+    threading.Thread(target=run, daemon=True).start()
+    return jsonify({"ok": True, "started": True})
+
 @app.patch("/pairs_update/<int:row_id>")
 def pairs_update(row_id: int):
     data = request.get_json(force=True, silent=True) or {}
