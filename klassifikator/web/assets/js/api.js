@@ -34,7 +34,7 @@ async function directusGet(path, params) {
   return data;
 }
 
-async function directusReadItems(collection, { fields, limit = 200, offset = 0, sort = null, filter = null } = {}) {
+export async function directusReadItems(collection, { fields, limit = 200, offset = 0, sort = null, filter = null } = {}) {
   const params = { limit: String(limit), offset: String(offset) };
   if (fields?.length) params.fields = fields.join(",");
   if (sort) params.sort = sort;
@@ -55,7 +55,7 @@ async function directusPatch(path, body) {
   return data;
 }
 
-async function directusUpdateItem(collection, id, patch) {
+export async function directusUpdateItem(collection, id, patch) {
   return directusPatch(`/items/${collection}/${encodeURIComponent(id)}`, patch);
 }
 
@@ -72,7 +72,5 @@ async function searchOpenSearch(q, { index = null, size = null } = {}) {
 export {
   apiUrl, apiGet,
   directusUrl, directusGet,
-  directusReadItems,
-  directusUpdateItem,
   searchOpenSearch
 };
