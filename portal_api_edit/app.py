@@ -84,6 +84,44 @@ def search():
     url = f"{OPENSEARCH_URL}/{index}/_search"
     r = requests.post(url, json=body, timeout=TIMEOUT)
     return (r.text, r.status_code, {"Content-Type": "application/json"})
+
+@app.get("/nomen_search_exact")
+def nomen_search_exact():
+    q = (request.args.get("q") or "").strip()
+    index = "class_tree_nomen_v1"
+
+    if not q:
+        return jsonify({"rows": [], "total": 0})
+
+    body = {
+        "size": 50,
+        "_source": True,
+        "query": {
+            "match": {
+                "item_name": {
+                    "query": q,
+                    "fuzziness": "AUTO",
+                    "operator": "and",
+                }
+            }
+        }
+    }
+
+    url = f"{OPENSEARCH_URL}/{index}/_search"
+    r = requests.post(url, json=body, timeout=TIMEOUT)
+
+    if r.status_code >= 300:
+        return (r.text, r.status_code, {"Content-Type": "application/json"})
+
+    data = r.json()
+    hits = (data.get("hits") or {})
+    total = hits.get("total") or 0
+    if isinstance(total, dict):
+        total = total.get("value") or 0
+
+    rows = [h.get("_source") or {} for h in (hits.get("hits") or [])]
+
+    return jsonify({"rows": rows, "total": total})
     
 @app.get("/pairs_list")
 def pairs_list():
