@@ -1,10 +1,13 @@
 import os
+import json
 import requests
 from flask import Flask, request, jsonify, send_file
 from openpyxl import load_workbook
 from copy import copy
 from flask_cors import CORS
 import tempfile
+from datetime import datetime, timezone
+from queue import Queue, Full
 
 import psycopg2
 import psycopg2.extras
@@ -32,6 +35,33 @@ PG_PASS = os.getenv("PG_PASS", "directus")
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+ACTION_LOG_FILE = os.getenv("ACTION_LOG_FILE", "/app/logs/actions.log")
+ACTION_LOG_QUEUE_SIZE = int(os.getenv("ACTION_LOG_QUEUE_SIZE", "10000"))
+
+action_log_queue = Queue(maxsize=ACTION_LOG_QUEUE_SIZE)
+
+
+def ensure_action_log_file(path: str):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "a", encoding="utf-8"):
+        pass
+
+
+def action_log_worker():
+    while True:
+        log_line = action_log_queue.get()
+        try:
+            with open(ACTION_LOG_FILE, "a", encoding="utf-8") as f:
+                f.write(log_line)
+        except Exception as e:
+            print("action logging failed:", e)
+        finally:
+            action_log_queue.task_done()
+
+
+ensure_action_log_file(ACTION_LOG_FILE)
+threading.Thread(target=action_log_worker, daemon=True).start()
 
 
 def pg_query(sql, params=None):
@@ -113,6 +143,28 @@ def universal_search():
         return jsonify({"total": total, "rows": rows})
     except Exception as e:
         return jsonify({"error": str(e), "total": 0, "rows": []}), 500
+
+
+@app.post("/v1/actions")
+def track_action():
+    payload = request.get_json(force=True, silent=True)
+    if payload is None:
+        return jsonify({"error": "invalid json"}), 400
+
+    event = {
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "ip": request.headers.get("X-Real-IP") or request.remote_addr,
+        "user_agent": request.headers.get("User-Agent", ""),
+        "path": request.path,
+        "data": payload,
+    }
+
+    log_line = json.dumps(event, ensure_ascii=False) + "\n"
+    try:
+        action_log_queue.put_nowait(log_line)
+        return jsonify({"ok": True, "queued": True}), 202
+    except Full:
+        return jsonify({"ok": False, "queued": False, "error": "log queue is full"}), 503
     
 @app.get("/pairs_list")
 def pairs_list():

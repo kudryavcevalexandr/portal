@@ -92,6 +92,7 @@ services:
       - "8010:8010"
     volumes:
       - /home/admintep/klassifikator/py_scripts:/scripts:ro
+      - ./os_api/logs:/app/logs
     networks: [appnet]
     restart: unless-stopped
 
