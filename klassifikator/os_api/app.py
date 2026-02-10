@@ -61,6 +61,14 @@ def action_log_worker():
 
 
 ensure_action_log_file(ACTION_LOG_FILE)
+
+startup_event = {
+    "ts": datetime.now(timezone.utc).isoformat(),
+    "event": "запись логов началась",
+}
+with open(ACTION_LOG_FILE, "a", encoding="utf-8") as f:
+    f.write(json.dumps(startup_event, ensure_ascii=False) + "\n")
+
 threading.Thread(target=action_log_worker, daemon=True).start()
 
 
