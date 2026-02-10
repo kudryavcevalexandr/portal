@@ -4,6 +4,27 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Поиск номенклатуры</title>
+  <script>
+    window.onerror = function (msg, url, line) {
+      fetch("http://localhost:9999", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "Runtime Error", msg, url, line })
+      });
+      return false;
+    };
+
+    window.addEventListener("unhandledrejection", function (event) {
+      fetch("http://localhost:9999", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "Promise Error",
+          msg: event?.reason?.message || String(event.reason)
+        })
+      });
+    });
+  </script>
   <style>
     :root{
       --r: 16px;
