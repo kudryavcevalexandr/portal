@@ -73,8 +73,6 @@ export { // fixed import/export
   apiUrl, apiGet,
   directusUrl, directusGet,
   directusReadItems,
-  // Совместимость с опечаткой в некоторых импортерах (латиница/cyrillic в `Items`).
-  directusReadItems as directusReadIteгms,
   directusUpdateItem,
   searchOpenSearch
 };
