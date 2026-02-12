@@ -42,6 +42,10 @@ async function directusReadItems(collection, { fields, limit = 200, offset = 0, 
   return directusGet(`/items/${collection}`, params);
 }
 
+// Совместимость: иногда в импорте проскакивает кириллическая "г" в имени функции.
+// Оставляем алиас, чтобы страница не падала на этапе загрузки модуля.
+const directusReadIteгms = directusReadItems;
+
 async function directusPatch(path, body) {
   const r = await fetch(directusUrl(path), {
     method: "PATCH",
@@ -73,6 +77,7 @@ export { // fixed import/export
   apiUrl, apiGet,
   directusUrl, directusGet,
   directusReadItems,
+  directusReadIteгms,
   directusUpdateItem,
   searchOpenSearch
 };

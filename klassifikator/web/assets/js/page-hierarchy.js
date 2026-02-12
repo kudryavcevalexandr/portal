@@ -4,6 +4,8 @@
 // Сортировка API: l1_num,l2_num,l3_num,l4_num,level
 
 import { directusReadItems } from "./api.js";
+import { buildTree } from "./tree.js";
+import { renderTableTree, TableTree } from "./table-tree.js";
 
 function el(id) { return document.getElementById(id); }
 
@@ -16,7 +18,7 @@ function ensureButtons() {
     b.className = "btn";
     b.type = "button";
     b.textContent = "Свернуть всё";
-    b.onclick = () => window.TableTree?.collapseAll?.();
+    b.onclick = () => TableTree?.collapseAll?.();
     host.appendChild(b);
   }
 
@@ -26,7 +28,7 @@ function ensureButtons() {
     b.className = "btn";
     b.type = "button";
     b.textContent = "Развернуть всё";
-    b.onclick = () => window.TableTree?.expandAll?.();
+    b.onclick = () => TableTree?.expandAll?.();
     host.appendChild(b);
   }
 }
@@ -68,17 +70,14 @@ function applyClientFilter(all, q) {
 }
 
 function renderFromRows(rows) {
-  const root = window.buildTree(rows);
-  window.renderTableTree(root);
-  window.TableTree?.collapseAll?.(); // по умолчанию свернуто
+  const root = buildTree(rows);
+  renderTableTree(root);
+  TableTree?.collapseAll?.(); // по умолчанию свернуто
 }
 
 (async function initHierarchyPage() {
   try {
     ensureButtons();
-
-    if (typeof window.buildTree !== "function") throw new Error("tree.js не подключён или buildTree не объявлен");
-    if (typeof window.renderTableTree !== "function") throw new Error("table-tree.js не подключён или renderTableTree не объявлен");
 
     const cfg = window.PORTAL_CONFIG || {};
     const collection = cfg.hierarchyCollection || cfg.classTreeCollection || "class_tree_v1";
