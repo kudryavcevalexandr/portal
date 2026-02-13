@@ -5,7 +5,8 @@ CREATE TABLE public.v_nomenclature_spec_pairs_processed_v1 (
     position_name text,-- наименование позиции
     unit_measure text,-- ед изм
     note text,-- примечание
-    l3_id bigint references public.class_l3(id),-- связку
+    note_added_date date,-- дата добавления примечаний
+    is_new_position boolean,-- отметка что новая позиция или повторное согласование
     classifier_binding bigint,-- привязка классификатора
     processed_name text-- наименование после обработки алгоритмами
 );
